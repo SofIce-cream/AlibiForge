@@ -2,12 +2,12 @@ const coartadaService = require("../services/coartadaService");
 const asyncHandler = require("../utils/asyncHandler");
 
 const obtenerCoartadas = asyncHandler(async (req, res) => {
-  const coartadas = await coartadaService.listarCoartadas();
+  const coartadas = await coartadaService.listarCoartadas(req.usuario);
   res.status(200).json({ ok: true, count: coartadas.length, coartadas });
 });
 
 const obtenerCoartadaPorId = asyncHandler(async (req, res) => {
-  const coartada = await coartadaService.obtenerCoartadaPorId(req.params.id);
+  const coartada = await coartadaService.obtenerCoartadaPorId(req.params.id, req.usuario);
   res.status(200).json({ ok: true, coartada });
 });
 
@@ -47,9 +47,21 @@ const marcarComoFalsa = asyncHandler(async (req, res) => {
 });
 
 const obtenerIndice = asyncHandler(async (req, res) => {
-  const coartada = await coartadaService.obtenerCoartadaPorId(req.params.id);
-  const indice = coartadaService.calcularIndiceCredibilidad(coartada);
-  res.status(200).json({ ok: true, indice });
+  const coartada = await coartadaService.obtenerCoartadaPorId(req.params.id, req.usuario);
+  res.status(200).json({
+    ok: true,
+    indice: coartada.indice,
+    detalle: {
+      promedioVotos: coartada.promedioVotos,
+      testigos: coartada.testigos.length,
+      complejidad: coartada.complejidad,
+    },
+  });
+});
+
+const cambiarEstado = asynHandler(async (req, res) => {
+  const coartada = await coartadaService.cambiarEstado(req.params.id, req.body.estado, req.usuario);
+  res.status(200).json({ ok: true, mensaje: `Estado actualizado a ${coartada.estado}`, coartada });
 });
 
 module.exports = {
@@ -63,4 +75,5 @@ module.exports = {
   votar,
   marcarComoFalsa,
   obtenerIndice,
+  cambiarEstado,
 };

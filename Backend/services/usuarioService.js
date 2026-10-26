@@ -3,7 +3,15 @@ const Usuario = require("../models/Usuario");
 const SIETE_DIAS_EN_MILISEGUNDOS = 7 * 24 * 60 * 60 * 1000;
 
 async function listarUsuarios() {
-  return await Usuario.find();
+  return await Usuario.find().populate("gremio", "nombre");
+}
+
+async function listarAliases(){
+  return (await Usuario.find().select("alias especialidad")).toSorted({alias: 1});
+}
+
+async function obtenerPerfil(id){
+  return await Usuario.findById(id).populate("gremio", "nombre descripcion");
 }
 
 async function cambiarRol(id, role) {
@@ -20,8 +28,7 @@ async function eliminarUsuario(id) {
   await usuario.deleteOne();
 }
 
-// Misma lógica que utils/usuarios.js del frontend:
-// suma/resta puntos de credibilidad, y si queda negativa (y aún no estaba
+// Suma/resta puntos de credibilidad, y si queda negativa (y aún no estaba
 // bloqueado) bloquea al usuario por 7 días.
 async function modificarCredibilidad(usuarioId, cambio) {
   const usuario = await Usuario.findById(usuarioId);
@@ -29,7 +36,7 @@ async function modificarCredibilidad(usuarioId, cambio) {
 
   usuario.credibilidad = usuario.credibilidad + cambio;
 
-  if (usuario.credibilidad < 0 && !usuario.bloqueadoHasta) {
+  if (usuario.credibilidad < 0 && !bloqueoVigente) {
     usuario.bloqueadoHasta = new Date(Date.now() + SIETE_DIAS_EN_MILISEGUNDOS);
   }
 
@@ -44,6 +51,8 @@ function puedeCrearCoartada(usuario) {
 
 module.exports = {
   listarUsuarios,
+  listarAliases,
+  obtenerPerfil,
   cambiarRol,
   eliminarUsuario,
   modificarCredibilidad,

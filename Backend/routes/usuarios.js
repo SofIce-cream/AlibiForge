@@ -30,10 +30,18 @@ router.use(autenticar);
  *       401:
  *         description: No autenticado
  */
-router.get("/me", (req, res) => {
-  res.json(req.usuario);
-});
+router.get("/me", asyncHandler(async (req, res) => {
+  res.json(await usuarioService.obtenerPerfil(req.usuario.id));
+})
+);
 
+router.get(
+  "/alias",
+  asyncHandler(async (req, res) => {
+    const usuarios = await usuarioService.listarAliases();
+    res.json({ ok: true, usuarios });
+  }),
+);
 // El resto de rutas de este archivo son solo para administradores
 router.use(autorizar("admin"));
 

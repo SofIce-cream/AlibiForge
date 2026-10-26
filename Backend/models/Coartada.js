@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { calcularIndiceCredibilidad } = require("../utils/credibilidad");
 
 const votoSchema = new mongoose.Schema(
   {
@@ -41,12 +42,13 @@ const coartadaSchema = new mongoose.Schema(
         message: "La coartada debe tener al menos 3 detalles",
       },
     },
-    testigos: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Usuario",
+    testigos: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Usuario" }],
+      validate: {
+        validator: (arr) => new Set(arr.map((t) => t.toString())).size === arr.length,
+        message: "Un usuario no puede ser testigo dos veces de la misma coartada",
       },
-    ],
+    },
     estado: {
       type: String,
       enum: {
@@ -60,19 +62,24 @@ const coartadaSchema = new mongoose.Schema(
       ref: "Usuario",
       required: [true, "La coartada debe estar vinculada a un autor"],
     },
-    votos: [votoSchema],
-    marcasFalsas: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Usuario",
+    // Un voto por usuario y coartada
+    votos: {
+      type: [votoSchema],
+      validate: {
+        validator: (arr) => new Set(arr.map((v) => v.usuario.toString())).size === arr.length,
+        message: "Un usuario solo puede votar una vez por coartada",
       },
-    ],
-    expuesta: {
-      type: Boolean,
-      default: false,
     },
+    marcasFalsas: [{ type: mongoose.Schema.Types.ObjectId, ref: "Usuario" }],
+    expuesta: { type: Boolean, default: false },
+    // Se recalcula en cada guardado (voto, testigo, detalles...)
+    indiceCredibilidad: { type: Number, default: 0 },
   },
   { timestamps: true },
 );
+
+coartadaSchema.pre("validate", function () {
+  this.indiceCredibilidad = calcularIndiceCredibilidad(this);
+});
 
 module.exports = mongoose.model("Coartada", coartadaSchema);

@@ -1,62 +1,56 @@
 const Coartada = require("../models/Coartada");
-const { calcularIndiceCredibilidad } = require("./coartadaService");
+const { calcularIndiceCredibilidad } = require("../utils/credibilidad");
 
-// Master of Deceit: mayor índice de credibilidad
-function masterDeceit(coartadas) {
-  const datos = coartadas.map((coartada) => ({
-    autor: coartada.autor.alias,
-    puntos: calcularIndiceCredibilidad(coartada),
-  }));
-  return datos.sort((a, b) => b.puntos - a.puntos);
-}
+// Rankings por AUTOR. Los promedios solo cuentan coartadas públicas
+// (no borradores ni rechazadas) con votos.
+const redondear = (n) => Math.round(n * 100) / 100;
 
-function calcularPromedioCreatividad(coartada) {
-  if (coartada.votos.length === 0) return 0;
-  let suma = 0;
-  coartada.votos.forEach((voto) => {
-    suma += voto.creatividad;
-  });
-  return suma / coartada.votos.length;
-}
-
-// Most Creative: mayor promedio de creatividad
-function mostCreative(coartadas) {
-  const datos = coartadas.map((coartada) => ({
-    autor: coartada.autor.alias,
-    puntos: calcularPromedioCreatividad(coartada),
-  }));
-  return datos.sort((a, b) => b.puntos - a.puntos);
-}
-
-function calcularPromedioConsistencia(coartada) {
-  if (coartada.votos.length === 0) return 0;
-  let suma = 0;
-  coartada.votos.forEach((voto) => {
-    suma += voto.consistencia;
-  });
-  return suma / coartada.votos.length;
-}
-
-// Most Consistent: mayor promedio de consistencia
-function mostConsistent(coartadas) {
-  const datos = coartadas.map((coartada) => ({
-    autor: coartada.autor.alias,
-    puntos: calcularPromedioConsistencia(coartada),
-  }));
-  return datos.sort((a, b) => b.puntos - a.puntos);
-}
-
-// Most Wanted: más coartadas creadas
-function mostWanted(coartadas) {
-  const cantidades = {};
+function agruparPorAutor(coartadas) {
+  const autores = {};
   coartadas.forEach((coartada) => {
+    if (!coartada.autor) return;
     const alias = coartada.autor.alias;
-    cantidades[alias] = (cantidades[alias] || 0) + 1;
+    if (!autores[alias]) autores[alias] = [];
+    autores[alias].push(coartada);
   });
+  return autores;
+}
 
-  const datos = Object.keys(cantidades).map((autor) => ({
+function promedioPorAutor(coartadas, calcular) {
+  const porAutor = agruparPorAutor(coartadas);
+  const datos = Object.keys(porAutor).map((autor) => {
+    const valores = porAutor[autor].map(calcular);
+    const suma = valores.reduce((acc, v) => acc + v, 0);
+    return { autor, puntos: redondear(suma / valores.length), coartadas: valores.length };
+  });
+  return datos.sort((a, b) => b.puntos - a.puntos);
+}
+
+function promedioCampo(coartada, campo) {
+  let suma = 0;
+  coartada.votos.forEach((voto) => {
+    suma += voto[campo];
+  });
+  return suma / coartada.votos.length;
+}
+
+function masterDeceit(coartadasConVotos) {
+  return promedioPorAutor(coartadasConVotos, calcularIndiceCredibilidad);
+}
+
+function mostCreative(coartadasConVotos) {
+  return promedioPorAutor(coartadasConVotos, (c) => promedioCampo(c, "creatividad"));
+}
+
+function mostConsistent(coartadasConVotos) {
+  return promedioPorAutor(coartadasConVotos, (c) => promedioCampo(c, "consistencia"));
+}
+
+function mostWanted(coartadas) {
+  const porAutor = agruparPorAutor(coartadas);
+  const datos = Object.keys(porAutor).map((autor) => ({
     autor,
-    puntos: cantidades[autor],
+    puntos: porAutor[autor].length,
   }));
   return datos.sort((a, b) => b.puntos - a.puntos);
 }
@@ -64,10 +58,14 @@ function mostWanted(coartadas) {
 async function calcularRankings() {
   const coartadas = await Coartada.find().populate("autor", "alias");
 
+  const conVotos = coartadas.filter(
+    (c) => c.votos.length > 0 && c.estado !== "Draft" && c.estado !== "Rejected",
+  );
+
   return {
-    masterDeceit: masterDeceit(coartadas),
-    mostCreative: mostCreative(coartadas),
-    mostConsistent: mostConsistent(coartadas),
+    masterDeceit: masterDeceit(conVotos),
+    mostCreative: mostCreative(conVotos),
+    mostConsistent: mostConsistent(conVotos),
     mostWanted: mostWanted(coartadas),
   };
 }

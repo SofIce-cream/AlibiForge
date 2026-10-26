@@ -1,7 +1,7 @@
 const express = require("express");
 const coartadaController = require("../controllers/coartadaController");
 const { autenticar } = require("../middleware/auth");
-const { validarCoartada, validarVoto } = require("../middleware/validators");
+const { validarCoartada, validarEstado, validarVoto } = require("../middleware/validators");
 
 const router = express.Router();
 router.use(autenticar);
@@ -163,6 +163,7 @@ router.put("/:id", coartadaController.actualizarCoartada);
  */
 router.delete("/:id", coartadaController.eliminarCoartada);
 
+router.put("/:id/estado", validarEstado, coartadaController.cambiarEstado);
 /**
  * @swagger
  * /api/coartadas/{id}/testigo:

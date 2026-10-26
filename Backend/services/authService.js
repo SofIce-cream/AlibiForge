@@ -1,15 +1,16 @@
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/Usuario");
 
-async function registrar({ alias, password, especialidad }) {
+async function registrar({ alias, password, especialidad, gremio }) {
   const usuarioExistente = await Usuario.findOne({ alias });
   if (usuarioExistente)
     throw { status: 400, message: "Ese alias ya está en uso" };
 
   // El role SIEMPRE se asigna por defecto ("user") desde el modelo.
-  const usuario = new Usuario({ alias, password, especialidad });
+  const usuario = new Usuario({ alias, password, especialidad, gremio: gremio || null });
 
   await usuario.save();
+  await usuario.populate("gremio", "nombre descripcion");
   const token = generarToken(usuario);
 
   const usuarioObj = usuario.toObject();
@@ -19,7 +20,7 @@ async function registrar({ alias, password, especialidad }) {
 }
 
 async function login({ alias, password }) {
-  const usuario = await Usuario.findOne({ alias }).select("+password");
+  const usuario = await Usuario.findOne({ alias }).select("+password").populate("gremio", "nombre descripcion");
   if (!usuario)
     throw { status: 401, message: "Alias o contraseña incorrectos" };
 

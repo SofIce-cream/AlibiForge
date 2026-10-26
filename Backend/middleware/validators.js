@@ -30,6 +30,10 @@ const validarRegistro = [
     .optional()
     .isIn(["Excusa Creativa", "Detallista", "Improvisador", "Conspirador"])
     .withMessage("Especialidad inválida"),
+  body("gremio")
+    .optional({values: "falsy"})
+    .isMongoId()
+    .withMessage("Gremio inválido"),
   verificarValidaciones,
 ];
 
@@ -62,6 +66,10 @@ const validarCoartada = [
     .optional()
     .isIn(["Draft", "Submitted", "UnderReview", "Rejected", "Approved"])
     .withMessage("Estado inválido"),
+  body("testigos")
+    .optional()
+    .isArray()
+    .withMessage("Los testigos deben ser una lista"),
   verificarValidaciones,
 ];
 
@@ -73,10 +81,33 @@ const validarVoto = [
   verificarValidaciones,
 ];
 
+const validarEstado = [
+  body("estado")
+  .isIn(["Draft", "Submitted", "UnderReview", "Rejected", "Approved"])
+  .withMessage("Estado inválido"),
+  verificarValidaciones,
+];
+
+const validarSituacion = [
+  body("titulo")
+    .trim()
+    .notEmpty()
+    .withMessage("El título es obligatorio")
+    .isLength({ min: 3, max: 100 })
+    .withMessage("El título debe tener entre 3 y 100 caracteres"),
+  body("descripcion")
+    .optional()
+    .isLength({ max: 300 })
+    .withMessage("La descripción no puede superar los 300 caracteres"),
+  verificarValidaciones,
+];
+
 module.exports = {
   verificarValidaciones,
   validarRegistro,
   validarLogin,
   validarCoartada,
   validarVoto,
+  validarEstado,
+  validarSituacion,
 };

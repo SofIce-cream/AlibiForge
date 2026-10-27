@@ -9,12 +9,16 @@ const coartadasRouter = require("./routes/coartadas");
 const usuariosRouter = require("./routes/usuarios");
 const rankingsRouter = require("./routes/rankings");
 const errorHandler = require("./middleware/errorHandler");
+const situacionesRouter = require("./routes/situaciones");
+const gremiosRouter = require("./routes/gremios");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // para parsear el body de las peticiones
+app.use("/api/situaciones", situacionesRouter);
+app.use("/api/gremios", gremiosRouter);
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));

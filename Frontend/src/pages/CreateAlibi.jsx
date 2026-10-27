@@ -1,9 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { tagsDefault } from "./TagSystem";
-import { obtenerCoartadas, guardarCoartadas } from "./coartadas";
-import { puedeCrearCoartada } from "../utils/usuarios";
-
-//Mini nota: hay algunas cosas que dependen de codigo de la otra rama (usuario y coartadas) no estan juntas por comodidad al hacer codigo pero si deseas que funcione quita los comentarios en estas :D
+import { crearCoartada, obtenerSituaciones, obtenerAliasUsuarios, obtenerAliasActual } from "../api";
 
 function CreateAlibi() {
     //Estados
@@ -14,15 +11,32 @@ function CreateAlibi() {
     const [detalles, setDetalles] = useState(["","",""]);
     const [estado, setEstado] = useState("");
     const [mensaje, setMensaje] = useState({texto: "",tipo: "" });
+    const [testigos, setTestigos] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
 
-    //Mockdata para usuario
-    const usuarios = [
-        { id: 1, alias: "ShadowHuntress" },
-        { id: 2, alias: "TomatoSoup" },
-        { id: 3, alias: "Urfear" },
-        { id: 4, alias: "Cowfarm" },
-        { id: 5, alias: "404error" }
-    ];
+    //Situaciones (foro) y usuarios que pueden ser testigos, desde el backend
+    useEffect(() => {
+        obtenerSituaciones()
+            .then((situaciones) => {
+                if (situaciones.length > 0) {
+                    setTags(situaciones.map((s) => ({ Id: s._id, nombre: s.titulo })));
+                }
+            })
+            .catch(() => {});
+
+        const aliasActual = obtenerAliasActual();
+        obtenerAliasUsuarios()
+            .then((lista) => setUsuarios(lista.filter((u) => u.alias !== aliasActual)))
+            .catch(() => {});
+    }, []);
+
+    function alternarTestigo(alias) {
+        if (testigos.includes(alias)) {
+            setTestigos(testigos.filter((t) => t !== alias));
+        } else {
+            setTestigos([...testigos, alias]);
+        }
+    }
 
     //Detalles
     function agregarDetalle() {
@@ -35,17 +49,9 @@ function CreateAlibi() {
         setDetalles(nuevosDetalles);
     }
 
-    //Crear Alibi
-    function crearAlibi(nuevoEstado) {
+        //Crear Alibi
+    async function crearAlibi(nuevoEstado) {
         const detallesLlenos = detalles.map((detalle) => detalle.trim()).filter((detalle) => detalle !== "");
-
-
-        //Usuario con sesión iniciada (si no hay, se usa el mock de antes)
-        const aliasActual = localStorage.getItem("usuarioActual");
-        if (aliasActual && !puedeCrearCoartada(aliasActual)) {
-            mostrarMensaje("Estás bloqueado: no puedes crear coartadas todavía.", "error");
-            return;
-        }
 
         //Validación
         if (!titulo || !situacion || !historia) {
@@ -54,46 +60,37 @@ function CreateAlibi() {
         }
 
         if (detallesLlenos.length < 3) {
-            mostrarMensaje(
-                "La coartada debe tener al menos 3 detalles.",
-                "error"
-            );
+            mostrarMensaje("La coartada debe tener al menos 3 detalles.", "error");
             return;
         }
 
-        //Coartadas
-        const coartadas = obtenerCoartadas();
+        //El backend valida el bloqueo (credibilidad < 0), los estados y los testigos
+        try {
+            const nueva = await crearCoartada({
+                titulo: titulo,
+                situacion: situacion,
+                historia: historia,
+                detalles: detallesLlenos,
+                testigos: testigos,
+                estado: nuevoEstado
+            });
 
-        const nuevaCoartda = {
-            id: Date.now(),
-            titulo: titulo,
-            situacion: situacion,
-            historia: historia,
-            detalles: detallesLlenos,
-            testigos: [],
-            estado: nuevoEstado,
-            autor: aliasActual || "ShadowHuntress",
-            votos: [],
-            marcasFalsas: [],
-            expuesta: false
-        };
+            setEstado(nueva.estado);
 
-        //Agregar la coartada creada
-        coartadas.push(nuevaCoartda);
-        guardarCoartadas(coartadas);
-        setEstado(nuevoEstado);
-        console.log("Coartada guardad:", nuevaCoartda)
+            if (nueva.estado === "Draft") {
+                mostrarMensaje("Alibi guardado como borrador.", "exito");
+            } else {
+                mostrarMensaje("Alibi enviado a revisión.", "exito");
+            }
 
-        //Estado
-        if (nuevoEstado === "Draft") {
-            mostrarMensaje("Alibi guardado como borrador.", "exito");
-        }
-
-        if (nuevoEstado === "Submitted") {
-            mostrarMensaje("Alibi enviado a revisión.", "exito");
-            setTimeout(() => {setEstado("UnderReview");
-                mostrarMensaje("🔍 Tu Alibi ahora está en revisión.", "revision");
-            }, 3000);
+            //Limpiar el formulario
+            setTitulo("");
+            setSituacion("");
+            setHistoria("");
+            setDetalles(["", "", ""]);
+            setTestigos([]);
+        } catch (error) {
+            mostrarMensaje(error.message, "error");
         }
     }
 
@@ -145,6 +142,18 @@ function CreateAlibi() {
         <button type="button" onClick={agregarDetalle} className="mt-4 rounded-lg bg-[#ded6ff] px-5 py-3 font-bold text-[#21175c] transition 
             hover:-translate-y-0.5 hover:bg-[#ccc1ff] active:translate-y-0" > + Agregar detalle </button> 
         
+        {/* TESTIGOS */}
+        <h2 className="mb-2 mt-6 text-xl font-semibold text-[#37288a]"> Testigos (opcional) </h2>
+        <div className="flex flex-wrap gap-2">
+            {usuarios.map((u) => (
+                <label key={u.alias} className="flex cursor-pointer items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-sm">
+                    <input type="checkbox" checked={testigos.includes(u.alias)} onChange={() => alternarTestigo(u.alias)} />
+                    {u.alias}
+                </label>
+            ))}
+            {usuarios.length === 0 && <p className="text-sm text-gray-500">No hay otros usuarios disponibles.</p>}
+        </div>
+
         {/* BOTONES */} 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row"> 
         <button type="button" onClick={() => crearAlibi("Draft")}

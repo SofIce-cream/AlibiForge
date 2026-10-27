@@ -1,29 +1,37 @@
-import { useState } from "react";
-import { obtenerCoartadas, unirseComoTestigo, desertarDeLaCadena } from "./coartadas";
+import { useState, useEffect } from "react";
+import { obtenerCoartadas, unirseComoTestigo, desertarDeLaCadena, obtenerAliasActual } from "../api";
+
+// Estados en los que una coartada admite testigos (no borradores ni rechazadas)
+const ESTADOS_CON_CADENA = ["Submitted", "UnderReview", "Approved"];
 
 function AlibiChain() {
-    const [coartadas, setCoartadas] = useState(obtenerCoartadas());
-    const [alias, setAlias] = useState("");
+    const [coartadas, setCoartadas] = useState([]);
     const [idCoartada, setIdCoartada] = useState("");
     const [mensaje, setMensaje] = useState("");
 
-    const usuarios = [
-        { id: 1, alias: "ShadowHuntress" },
-        { id: 2, alias: "TomatoSoup" },
-        { id: 3, alias: "Urfear" },
-        { id: 4, alias: "Cowfarm" },
-        { id: 5, alias: "404error" }
-    ];
+    // El usuario es el de la sesión iniciada
+    const alias = obtenerAliasActual() || "";
 
-    function unirse() {
+    async function cargarCoartadas() {
+        try {
+            const lista = await obtenerCoartadas();
+            setCoartadas(lista.filter((coartada) => ESTADOS_CON_CADENA.includes(coartada.estado)));
+        } catch (error) {
+            setMensaje(error.message);
+        }
+    }
+
+    useEffect(() => {
+        cargarCoartadas();
+    }, []);
+
+    async function unirse() {
         if (!alias || !idCoartada) {
-            setMensaje("Selecciona una coartada y un usuario.");
+            setMensaje("Selecciona una coartada (y inicia sesión).");
             return;
         }
 
-        const coartada = coartadas.find(
-            (coartada) => coartada.id === Number(idCoartada)
-        );
+        const coartada = coartadas.find((coartada) => coartada.id === idCoartada);
 
         if (!coartada) {
             setMensaje("No se encontró la coartada.");
@@ -35,25 +43,23 @@ function AlibiChain() {
             return;
         }
 
-        const nuevasCoartadas = unirseComoTestigo(
-            coartadas,
-            Number(idCoartada),
-            alias
-        );
-
-        setCoartadas([...nuevasCoartadas]);
-        setMensaje(`${alias} ahora es testigo de la coartada.`);
+        try {
+            await unirseComoTestigo(idCoartada);
+            setMensaje(`${alias} ahora es testigo de la coartada.`);
+            await cargarCoartadas();
+        } catch (error) {
+            setMensaje(error.message);
+        }
     }
 
-    function desertar(id) {
-        const nuevasCoartadas = desertarDeLaCadena(
-            coartadas,
-            id,
-            alias
-        );
-
-        setCoartadas([...nuevasCoartadas]);
-        setMensaje(`${alias} abandonó la Alibi Chain.`);
+    async function desertar(id) {
+        try {
+            await desertarDeLaCadena(id);
+            setMensaje(`${alias} abandonó la Alibi Chain.`);
+            await cargarCoartadas();
+        } catch (error) {
+            setMensaje(error.message);
+        }
     }
 
     return (
@@ -61,6 +67,7 @@ function AlibiChain() {
             <div className="mx-auto max-w-3xl rounded-2xl bg-[#f5f2ff] p-6 shadow-xl sm:p-9">
                 <h1 className="mb-8 text-center text-3xl font-bold text-[#0d0074]">Alibi Chain</h1>
                 <h2 className="mb-2 text-xl font-semibold text-[#37288a]">Usuario</h2>
+                <p className="mb-6 rounded-lg border-2 border-[#8e7bdc] bg-white p-3">{alias || "Inicia sesión para unirte a una cadena"}</p>
                 <select value={alias} onChange={(e) => setAlias(e.target.value)} className="mb-6 w-full
                  rounded-lg border-2 border-[#8e7bdc] bg-white p-3">
                 <option value="">Selecciona tu usuario</option>

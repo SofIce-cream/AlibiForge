@@ -232,3 +232,29 @@ section p {
 .votar button:nth-child(6):hover {
     background-color: var(--danger-bg);
 }
+
+/* --- Rankings y top de situaciones --- */
+.ranking-descripcion {
+    color: var(--text-sub);
+    margin-top: 0;
+}
+
+.ranking-lista {
+    padding-left: 24px;
+    margin: 10px 0 0 0;
+}
+
+.ranking-lista li {
+    margin: 8px 0;
+}
+
+.ranking-lista li strong {
+    float: right;
+    color: var(--text-heading);
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { obtenerUsuarios } from "../utils/usuarios";
+import {iniciarSesion} from "../api";
 
 function Login() {
     const [alias, setAlias] = useState("");
@@ -10,9 +11,15 @@ function Login() {
 
     const navegar = useNavigate();
 
-    function manejarSubmit(evento) {
+    async function manejarSubmit(evento) {
         evento.preventDefault();
-
+        
+        try{
+            await iniciarSesion(alias, password);
+            navegar("/perfil");
+        } catch(error){
+            setMmensaje(error.message);
+        }
         const usuarios = obtenerUsuarios();
 
         const usuarioEncontrado = usuarios.find(function (usuario) {

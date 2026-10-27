@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { obtenerUsuarios } from "../utils/usuarios";
+import { obtenerPerfil, haySesion, cerrarSesion as limpiarSesion } from "../api";
 
 function Perfil() {
     // Empezamos con "null" porque todavía no sabemos quién es el usuario
@@ -10,23 +11,21 @@ function Perfil() {
 
     // Arreglo vacio para que se ejecute una sola vez 
     useEffect(function () {
-        const aliasActual = localStorage.getItem("usuarioActual");
-
-        if (!aliasActual) {
-            navegar("/"); // sin sesion mandamos al login
+        if (!haySesion()) {
+            navegar("/");
             return;
         }
 
-        const usuarios = obtenerUsuarios();
-        const encontrado = usuarios.find(function (u) {
-            return u.alias === aliasActual;
-        });
-
-        setUsuario(encontrado); // guardamos el usuario en el estado
+        obtenerPerfil()
+            .then(setUsuario)
+            .catch(function () {
+                limpiarSesion();
+                navegar("/");
+            });
     }, []);
 
     function cerrarSesion() {
-        localStorage.removeItem("usuarioActual");
+        limpiarSesion();
         navegar("/");
     }
 
@@ -35,7 +34,8 @@ function Perfil() {
         return null;
     }
 
-    const estaBloqueado = usuario.bloqueadoHasta && Date.now() < usuario.bloqueadoHasta;
+    const bloqueadoHasta = usuario.bloqueadoHasta ? new Date(usuario.bloqueadoHasta).getTime() : null;
+    const estaBloqueado = bloqueadoHasta && Date.now() < bloqueadoHasta;
 
     return (
         <main>
@@ -43,12 +43,13 @@ function Perfil() {
             <section>
                 <p><strong>Alias:</strong> {usuario.alias}</p>
                 <p><strong>Especialidad:</strong> {usuario.especialidad}</p>
+                <p><strong>Gremio:</strong> {usuario.gremio ? usuario.gremio.nombre : "Sin gremio"}</p>
                 <p><strong>Credibilidad:</strong> {usuario.credibilidad} puntos</p>
 
                 {estaBloqueado && (
                     <p className="bloqueado">
                          No puedes crear coartadas hasta el{" "}
-                        {new Date(usuario.bloqueadoHasta).toLocaleDateString()}
+                        {new Date(bloqueadoHasta).toLocaleDateString()}
                     </p>
                 )}
             </section>

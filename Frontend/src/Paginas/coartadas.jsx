@@ -1,82 +1,99 @@
 import { useState, useEffect } from "react";
-import { obtenerCoartadas, guardarCoartadas, unirseComoTestigo, desertarDeLaCadena, marcarComoFalsa } from "../Almacenamiento/coartadas";
+import { useNavigate } from "react-router-dom";
+import {
+    obtenerCoartadas,
+    votarCoartada,
+    unirseComoTestigo,
+    desertarDeLaCadena,
+    marcarComoFalsa,
+    cambiarEstadoCoartada,
+    obtenerAliasActual
+} from "../api";
 import TarjetaCoartada from "../Reutilizables/Tarjetacoartadas";
  
 function Coartadas() {
     const [coartadas, setCoartadas] = useState([]);
+    const [cargando, setCargando] = useState(true);
+    const navegar = useNavigate();
  
-    //Buscamos el usuario para cumplir la regla de solo 1 votar una vez por coartada
-    const [aliasActual, setAliasActual] = useState(null);
+    const aliasActual = obtenerAliasActual();
+ 
+    async function cargarCoartadas() {
+        try {
+            setCoartadas(await obtenerCoartadas());
+        } catch (error) {
+            alert(error.message);
+            if (error.status === 401) {
+                navegar("/");
+            }
+        } finally {
+            setCargando(false);
+        }
+    }
  
     useEffect(function () {
-        setCoartadas(obtenerCoartadas());
-        setAliasActual(localStorage.getItem("usuarioActual"));
+        cargarCoartadas();
     }, []);
  
-    // "prestamos" coartada guardada
+    // Reemplaza en la lista la coartada que devolvió el backend (con el índice recalculado)
+    function actualizarEnLista(coartadaActualizada) {
+        setCoartadas(function (lista) {
+            return lista.map(function (c) {
+                return c.id === coartadaActualizada.id ? coartadaActualizada : c;
+            });
+        });
+    }
+ 
+    // Ejecuta una acción del backend; si falla (ej. "Ya votaste") muestra el mensaje
+    async function ejecutar(accion) {
+        try {
+            actualizarEnLista(await accion());
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+ 
     function manejarVoto(idCoartada, voto) {
-        const listaActual = obtenerCoartadas();
- 
-        const coartada = listaActual.find(function (c) {
-            return c.id === idCoartada;
-        });
- 
-        if (!coartada) {
-            return;
-        }
- 
-        const yaVoto = coartada.votos.some(function (v) {
-            return v.usuario === aliasActual;
-        });
- 
-        if (yaVoto) {
-            alert("Ya votaste esta coartada.");
-            return;
-        }
- 
-        coartada.votos.push({
-            usuario: aliasActual,
-            credibilidad: voto.credibilidad,
-            creatividad: voto.creatividad,
-            consistencia: voto.consistencia
-        });
- 
-        guardarCoartadas(listaActual);
- 
-         // actualizar el estado de la lista
-        setCoartadas(listaActual);
+        ejecutar(function () { return votarCoartada(idCoartada, voto); });
     }
  
-    // Unirse como testigo, revisamos duplicados y guardamos en LocalStorage
     function manejarTestigo(idCoartada) {
-        const listaActualizada = unirseComoTestigo(obtenerCoartadas(), idCoartada, aliasActual);
-        setCoartadas([...listaActualizada]); 
+        ejecutar(function () { return unirseComoTestigo(idCoartada); });
     }
  
-    // Desertar: además de quitar al testigo, penaliza credibilidad
-    function manejarDesertar(idCoartada) {
-        const listaActualizada = desertarDeLaCadena(obtenerCoartadas(), idCoartada, aliasActual);
-        setCoartadas([...listaActualizada]);
+    // Desertar penaliza credibilidad (lo hace el backend)
+    async function manejarDesertar(idCoartada) {
+        await ejecutar(function () { return desertarDeLaCadena(idCoartada); });
+        cargarCoartadas();
     }
  
-    function manejarMarcarFalsa(idCoartada) {
-        const listaActualizada = marcarComoFalsa(obtenerCoartadas(), idCoartada, aliasActual);
-        setCoartadas([...listaActualizada]);
+    async function manejarMarcarFalsa(idCoartada) {
+        await ejecutar(function () { return marcarComoFalsa(idCoartada); });
+    }
+ 
+    // Draft → Submitted → UnderReview → Approved | Rejected
+    function manejarCambioEstado(idCoartada, nuevoEstado) {
+        ejecutar(function () { return cambiarEstadoCoartada(idCoartada, nuevoEstado); });
     }
  
     return (
         <main>
             <h2>Coartadas de la comunidad</h2>
  
+            {cargando && <p>Cargando coartadas...</p>}
+            {!cargando && coartadas.length === 0 && <p>Todavía no hay coartadas.</p>}
+ 
             {coartadas.map(function (coartada) {
                 return (
                     <TarjetaCoartada
                         key={coartada.id}
                         coartada={coartada}
+                        aliasActual={aliasActual}
                         onVotar={manejarVoto}
                         onTestigo={manejarTestigo}
                         onDesertar={manejarDesertar}
                         onMarcarFalsa={manejarMarcarFalsa}
+                        onCambiarEstado={manejarCambioEstado}
                     />
                 );
             })}

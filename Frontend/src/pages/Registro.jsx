@@ -1,45 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { obtenerUsuarios, guardarUsuarios } from "../utils/usuarios";
+import { registrarUsuario, obtenerGremios } from "../api";
 
 function Registro() {
 
     const [alias, setAlias] = useState("");
     const [password, setPassword] = useState("");
     const [especialidad, setEspecialidad] = useState("Excusa Creativa");
+    const [gremio, setGremio] = useState("");
+    const [gremios, setGremios] = useState([]);
     const [mensaje, setMensaje] = useState("");
 
     const navegar = useNavigate();
 
-    function manejarSubmit(evento) {
+    // Cargamos los gremios disponibles desde el backend
+    useEffect(function () {
+        obtenerGremios()
+            .then(setGremios)
+            .catch(function () {
+                setGremios([]);
+            });
+    }, []);
+
+    async function manejarSubmit(evento) {
         evento.preventDefault();
 
-        const usuarios = obtenerUsuarios();
+        try {
+            await registrarUsuario({ alias, password, especialidad, gremio });
+            setMensaje("¡Cuenta creada! Ya puedes iniciar sesión.");
 
-        const yaExiste = usuarios.some(function (usuario) {
-            return usuario.alias === alias;
-        });
-
-        if (yaExiste) {
-            setMensaje("Ese alias ya está en uso, elige otro.");
-            return;
+            setTimeout(function () {
+                navegar("/");
+            }, 1000);
+        } catch (error) {
+            setMensaje(error.message);
         }
-
-        const nuevoUsuario = {
-            alias: alias,
-            password: password,
-            especialidad: especialidad,
-            credibilidad: 0
-        };
-
-        usuarios.push(nuevoUsuario);
-        guardarUsuarios(usuarios);
-
-        setMensaje("¡Cuenta creada! Ya puedes iniciar sesión.");
-
-        setTimeout(function () {
-            navegar("/");
-        }, 1000);
     }
 
     // Input controlados
@@ -75,6 +70,18 @@ function Registro() {
                         <option value="Detallista">Detallista</option>
                         <option value="Improvisador">Improvisador</option>
                         <option value="Conspirador">Conspirador</option>
+                    </select>
+                </p>
+                <p>
+                    <label>Gremio:</label><br />
+                    <select
+                        value={gremio}
+                        onChange={(evento) => setGremio(evento.target.value)}
+                    >
+                        <option value="">Sin gremio</option>
+                        {gremios.map(function (g) {
+                            return <option key={g._id} value={g._id}>{g.nombre}</option>;
+                        })}
                     </select>
                 </p>
                 <button type="submit">Registrarme</button>

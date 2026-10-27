@@ -2,13 +2,17 @@ import { useState } from "react";
 import { calcularIndiceCredibilidad } from "../Almacenamiento/coartadas";
  
 // "presta" coartadas
-function TarjetaCoartada({ coartada, onVotar, onTestigo, onDesertar, onMarcarFalsa }) {
+function TarjetaCoartada({ coartada, aliasActual, onVotar, onTestigo, onDesertar, onMarcarFalsa, onCambiarEstado }) {
  
     const [credibilidad, setCredibilidad] = useState(3);
     const [creatividad, setCreatividad] = useState(3);
     const [consistencia, setConsistencia] = useState(3);
  
-    const indice = calcularIndiceCredibilidad(coartada);
+    const indice = coartada.indice !== undefined ? coartada.indice : calcularIndiceCredibilidad(coartada);
+    const transiciones = coartada.transiciones || [];
+    const yaVoto = coartada.votos.some(function (v){
+        return v.usuario === aliasActual;
+    }); 
  
     function manejarVotar() {
         onVotar(coartada.id, {
@@ -26,7 +30,7 @@ function TarjetaCoartada({ coartada, onVotar, onTestigo, onDesertar, onMarcarFal
             <p><strong>Detalles clave:</strong> {coartada.detalles.join(", ")}</p>
             <p><strong>Autor:</strong> {coartada.autor}</p>
             <p><strong>Estado:</strong> {coartada.estado}</p>
-            <p><strong>Testigos:</strong> {coartada.testigos.length}</p>
+            <p><strong>Testigos:</strong> {coartada.testigos.length}{coartada.testigos.length > 0 && `(${coartada.testigos.join(", ")})`}</p>
  
             {/* solo si la coartada fue marcada falsa */}
             {coartada.expuesta && (
@@ -71,10 +75,17 @@ function TarjetaCoartada({ coartada, onVotar, onTestigo, onDesertar, onMarcarFal
                     </select>
                 </label>
  
-                <button onClick={manejarVotar}>Votar</button>
+                <button onClick={manejarVotar} disabled={yaVoto}>{yaVoto ? "Ya votaste" : "Votar"}</button>
                 <button onClick={() => onTestigo(coartada.id)}>Ser testigo</button>
                 <button onClick={() => onDesertar(coartada.id)}>Desertar</button>
                 <button onClick={() => onMarcarFalsa(coartada.id)}>Marcar como falsa</button>
+                {transiciones.map(function(estado){
+                    return(
+                        <button key = {estado} onClick= {() => onCambiarEstado(coartada.id, estado)}>
+                            Pasar a {estado}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

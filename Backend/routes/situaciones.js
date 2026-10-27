@@ -1,10 +1,10 @@
 const express = require('express');
 const situacionController = require('../controllers/situacionController');
-const {autentircar} = require('../middleware/auth');
+const {autenticar} = require('../middleware/auth');
 const {validarSituacion} = require('../middleware/validators');
 
 const router = express.Router();
-router.use(autentircar);
+router.use(autenticar);
 
 router.get('/', situacionController.listar);
 router.post('/', validarSituacion, situacionController.crear);

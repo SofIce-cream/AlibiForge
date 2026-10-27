@@ -68,28 +68,23 @@ function AlibiChain() {
                 <h1 className="mb-8 text-center text-3xl font-bold text-[#0d0074]">Alibi Chain</h1>
                 <h2 className="mb-2 text-xl font-semibold text-[#37288a]">Usuario</h2>
                 <p className="mb-6 rounded-lg border-2 border-[#8e7bdc] bg-white p-3">{alias || "Inicia sesión para unirte a una cadena"}</p>
-                <select value={alias} onChange={(e) => setAlias(e.target.value)} className="mb-6 w-full
-                 rounded-lg border-2 border-[#8e7bdc] bg-white p-3">
-                <option value="">Selecciona tu usuario</option>
-                {usuarios.map((usuario) => (<option key={usuario.id} value={usuario.alias}>{usuario.alias}</option>))}
-                </select>
                 <h2 className="mb-2 text-xl font-semibold text-[#37288a]">Coartada</h2>
-                
+
                 <select value={idCoartada} onChange={(e) => setIdCoartada(e.target.value)} className="mb-6 w-full
                  rounded-lg border-2 border-[#8e7bdc] bg-white p-3">
                     <option value="">Selecciona una coartada</option>
 
-                    {coartadas.filter((coartada) => coartada.estado === "Submitted").map((coartada) => 
+                    {coartadas.map((coartada) =>
                         (<option key={coartada.id} value={coartada.id}> {coartada.titulo} </option>))}
                 </select>
 
-                <button type="button" onClick={unirse} className="rounded-lg bg-[#0d0074] px-5 py-3 font-bold text-white"> 
+                <button type="button" onClick={unirse} className="rounded-lg bg-[#0d0074] px-5 py-3 font-bold text-white">
                     Unirse como testigo </button>
 
                 {mensaje && ( <p className="mt-5 rounded-lg bg-[#e8e2ff] p-3 font-semibold"> {mensaje} </p>)}
 
                 <div className="mt-8">
-                {coartadas.filter((coartada) => coartada.estado === "Submitted").map((coartada) => (
+                {coartadas.map((coartada) => (
                             <div key={coartada.id} className="mb-4 rounded-lg bg-white p-5 shadow-sm">
                                 <h3 className="text-lg font-bold text-[#37288a]">{coartada.titulo}</h3>
                                 <p className="mt-2">Autor: {coartada.autor}</p>

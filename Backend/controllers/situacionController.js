@@ -6,7 +6,7 @@ const listar = asyncHandler(async (req, res) => {
     res.status(200).json({ok: true, count: situaciones.length, situaciones});
 });
 
-const obtener = asynHandler(async (req, res) => {
+const obtener = asyncHandler(async (req, res) => {
     const situacion = await situacionService.obtenerSituacion(req.params.id, req.usuario);
     res.status(200).json({ok: true, situacion});
 });

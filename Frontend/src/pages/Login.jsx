@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { obtenerUsuarios } from "../utils/usuarios";
 import {iniciarSesion} from "../api";
 
 function Login() {
@@ -13,26 +12,13 @@ function Login() {
 
     async function manejarSubmit(evento) {
         evento.preventDefault();
-        
-        try{
+
+        try {
             await iniciarSesion(alias, password);
             navegar("/perfil");
-        } catch(error){
-            setMmensaje(error.message);
+        } catch (error) {
+            setMensaje(error.message);
         }
-        const usuarios = obtenerUsuarios();
-
-        const usuarioEncontrado = usuarios.find(function (usuario) {
-            return usuario.alias === alias && usuario.password === password;
-        });
-
-        if (!usuarioEncontrado) {
-            setMensaje("Alias o contraseña incorrectos.");
-            return;
-        }
-
-        localStorage.setItem("usuarioActual", alias);
-        navegar("/perfil");
     }
 
     return (

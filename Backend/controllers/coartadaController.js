@@ -59,7 +59,7 @@ const obtenerIndice = asyncHandler(async (req, res) => {
   });
 });
 
-const cambiarEstado = asynHandler(async (req, res) => {
+const cambiarEstado = asyncHandler(async (req, res) => {
   const coartada = await coartadaService.cambiarEstado(req.params.id, req.body.estado, req.usuario);
   res.status(200).json({ ok: true, mensaje: `Estado actualizado a ${coartada.estado}`, coartada });
 });

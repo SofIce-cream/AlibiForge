@@ -7,7 +7,7 @@ async function listarUsuarios() {
 }
 
 async function listarAliases(){
-  return (await Usuario.find().select("alias especialidad")).toSorted({alias: 1});
+  return await Usuario.find().select("alias especialidad").sort({ alias: 1 });
 }
 
 async function obtenerPerfil(id){
@@ -28,13 +28,16 @@ async function eliminarUsuario(id) {
   await usuario.deleteOne();
 }
 
-// Suma/resta puntos de credibilidad, y si queda negativa (y aún no estaba
-// bloqueado) bloquea al usuario por 7 días.
+// Suma/resta puntos de credibilidad, y si queda negativa (y no tiene un
+// bloqueo vigente) bloquea al usuario por 7 días.
 async function modificarCredibilidad(usuarioId, cambio) {
   const usuario = await Usuario.findById(usuarioId);
   if (!usuario) return;
 
   usuario.credibilidad = usuario.credibilidad + cambio;
+
+  const bloqueoVigente =
+    usuario.bloqueadoHasta && new Date(usuario.bloqueadoHasta).getTime() > Date.now();
 
   if (usuario.credibilidad < 0 && !bloqueoVigente) {
     usuario.bloqueadoHasta = new Date(Date.now() + SIETE_DIAS_EN_MILISEGUNDOS);

@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { obtenerUsuarios } from "../utils/usuarios";
 import { obtenerPerfil, haySesion, cerrarSesion as limpiarSesion } from "../api";
 
 function Perfil() {

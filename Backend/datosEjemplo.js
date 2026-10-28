@@ -9,7 +9,7 @@ const Usuario = require("./models/Usuario");
 const Coartada = require("./models/Coartada");
 const Situacion = require("./models/Situacion");
 
-const PASSWORD = "HelloWorld*29"; // contraseña de todos los usuarios de ejemplo
+const PASSWORD = "HelloWorld*29"; 
 const SIETE_DIAS = 7 * 24 * 60 * 60 * 1000;
 
 const gremiosData = [

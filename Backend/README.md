@@ -11,8 +11,8 @@ API RESTful desarrollada con **Node.js**, **Express** y **MongoDB / Mongoose** p
 ---
 
 ## 🌐 API Desplegada en Producción
-- **URL Base:** https://backend-sk85.onrender.com
-- **Documentación Swagger:** https://backend-sk85.onrender.com/api-docs
+- **URL Base:** https://alibiforge.onrender.com/
+- **Documentación Swagger:** https://alibiforge.onrender.com/api-docs/
 
 ---
 
@@ -124,7 +124,7 @@ npm start
 
 La especificación completa OpenAPI 3.0 con soporte interactivo para probar endpoints (`Try it out`) y autenticación Bearer Token se encuentra disponible en:
 
-👉 **[https://backend-sk85.onrender.com/api-docs](https://backend-sk85.onrender.com/api-docs)**
+👉 **[https://alibiforge.onrender.com/api-docs/](https://alibiforge.onrender.com/api-docs/)**
 
 ---
 

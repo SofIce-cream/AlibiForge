@@ -7,7 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "usuarios:prueba": "node crearUsuariosPrueba.js",
+    "datos:ejemplo": "node datosEjemplo.js"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +21,7 @@
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
-    "mongodb": "^7.6.0",
+    "mongodb": "^7.7.0",
     "mongoose": "^9.9.5",
     "morgan": "^1.12.1",
     "swagger-jsdoc": "^6.3.0",

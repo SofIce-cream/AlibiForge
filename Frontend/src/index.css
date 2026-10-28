@@ -1,260 +1,413 @@
 @import "tailwindcss";
 
-/* Variables basadas en el diseño de tu app (AlibiForge) */
 :root {
-  --bg-primary: #ac97ff;
-  --bg-card: #f5f2ff;
-  --text-main: #21175c;
-  --text-heading: #0d0074;
-  --text-sub: #37288a;
-  --border-color: #8e7bdc;
-  --primary-btn: #0d0074;
-  --primary-btn-hover: #1600a0;
-  --danger-color: #dc2626;
+  --negro: #070712;
+  --navy: #0b1030;
+  --azul: #2f55e8;
+  --azul-oscuro: #1b2a9c;
+  --azul-claro: #6ea0ff;
+  --lavanda: #ac97ff;
+
+  --bg-card: #f4f6ff;
+  --bg-suave: #eaeeff;
+  --text-main: #161a3f;
+  --text-heading: #0b1030;
+  --text-sub: #2b3a8f;
+  --border-color: #b9c3f5;
+
+  --danger-color: #b91c1c;
   --danger-bg: #fee2e2;
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: var(--text-main);
-    background-color: var(--bg-primary);
-    margin: 0;
-    min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text-main);
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--negro);
+  background-image:
+    radial-gradient(900px 500px at 85% -10%, rgba(47, 85, 232, 0.55), transparent 60%),
+    radial-gradient(800px 500px at 0% 105%, rgba(172, 151, 255, 0.28), transparent 60%);
+  background-attachment: fixed;
 }
 
-/* Estilos para los <main> genéricos (Login, Registro, Perfil) para que parezcan tarjetas modernas */
+/* Cabecera y navegación  */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding: 14px 32px;
+  background: rgba(7, 7, 18, 0.88);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(172, 151, 255, 0.25);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, var(--lavanda), var(--azul-claro));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+header nav a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #c9cdf5;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+header nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  text-decoration: none;
+}
+
+header nav a.active {
+  background: var(--azul);
+  color: #fff;
+}
+
+/* Tarjeta principal (Login, Registro, Perfil, Coartadas...)  */
 main:not(.min-h-screen) {
-    background-color: var(--bg-card);
-    padding: 40px;
-    max-width: 450px;
-    margin: 60px auto;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  background-color: var(--bg-card);
+  padding: 36px;
+  max-width: 450px;
+  margin: 48px auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
 }
 
-h2, h3 {
-    color: var(--text-heading);
-    margin-top: 0;
+/* Páginas con más contenido (listas, tarjetas, rankings) */
+main.pagina-ancha {
+  max-width: 860px;
+}
+
+/* Páginas hechas con Tailwind (Crear coartada, Alibi Chain): el fondo lo da el body */
+main.min-h-screen > div {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+main:not(.min-h-screen) h2,
+main:not(.min-h-screen) h3 {
+  color: var(--text-heading);
+  margin-top: 0;
 }
 
 main:not(.min-h-screen) > h2 {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-bottom: 30px;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid var(--azul);
 }
 
+main > p {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Formularios  */
 form p {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
-label {
-    font-weight: 600;
-    color: var(--text-sub);
-    margin-bottom: 5px;
-    display: inline-block;
+label:not([class]) {
+  font-weight: 600;
+  color: var(--text-sub);
+  margin-bottom: 5px;
+  display: inline-block;
 }
 
-/* Inputs y Selects modernizados */
 form input,
 form select,
 .votar select {
-    padding: 12px 16px;
-    margin: 5px 0 15px 0;
-    width: 100%;
-    box-sizing: border-box;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    background-color: white;
-    color: var(--text-main);
-    outline: none;
-    transition: all 0.2s ease-in-out;
+  padding: 12px 16px;
+  margin: 5px 0 15px 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background-color: #fff;
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.2s ease-in-out;
 }
 
 form input:focus,
 form select:focus,
 .votar select:focus {
-    border-color: var(--text-heading);
-    box-shadow: 0 0 0 3px #c9c0ff;
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(47, 85, 232, 0.25);
 }
 
-/* Botones principales */
-button {
-    background-color: var(--primary-btn);
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.2s ease-in-out;
-    margin-top: 10px;
+/*  Botones */
+/* Los botones con clases propias (Tailwind) conservan su diseño */
+button:not([class]),
+button.btn-secundario,
+button.btn-peligro,
+button.btn-estado {
+  background: linear-gradient(135deg, var(--azul-oscuro), var(--azul));
+  color: #fff;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease-in-out;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(27, 42, 156, 0.3);
 }
 
-button:hover {
-    background-color: var(--primary-btn-hover);
-    transform: translateY(-2px);
+button:not([class]):hover,
+button.btn-secundario:hover,
+button.btn-peligro:hover,
+button.btn-estado:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
 }
 
-button:active {
-    transform: translateY(0);
+button:not([class]):active,
+button.btn-secundario:active,
+button.btn-peligro:active,
+button.btn-estado:active {
+  transform: translateY(0);
 }
 
-/* Enlaces */
-a {
-    color: var(--text-sub);
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.2s;
+button.btn-secundario {
+  background: var(--navy);
+  box-shadow: 0 4px 12px rgba(7, 7, 18, 0.3);
 }
 
-a:hover {
-    color: var(--text-heading);
-    text-decoration: underline;
+button.btn-peligro {
+  background: linear-gradient(135deg, #7f1d1d, #dc2626);
+  box-shadow: 0 4px 12px rgba(127, 29, 29, 0.3);
 }
 
-main > p {
-    text-align: center;
-    margin-top: 20px;
-}
-
-/* --- Componente Perfil --- */
-section {
-    background-color: white;
-    padding: 20px;
-    border-radius: 12px;
-    border: 2px solid var(--border-color);
-    margin-bottom: 25px;
-}
-
-section p {
-    margin: 10px 0;
-    font-size: 1.05rem;
-}
-
-/* --- Componente Tarjeta Coartada --- */
-.tarjeta-coartada {
-    background-color: white;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-    max-width: 100%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tarjeta-coartada:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.tarjeta-coartada h3 {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--bg-card);
-    padding-bottom: 12px;
-}
-
-.tarjeta-coartada p {
-    margin: 8px 0;
-    line-height: 1.5;
-}
-
-.tarjeta-coartada strong {
-    color: var(--text-sub);
-}
-
-.tarjeta-coartada .indice {
-    color: var(--text-heading);
-    background-color: var(--bg-card);
-    padding: 8px 14px;
-    border-radius: 8px;
-    display: inline-block;
-    margin: 15px 0;
-    font-size: 1.1rem;
-}
-
-/* --- Alertas y Bloqueos --- */
-.bloqueado, .aviso-expuesta {
-    color: var(--danger-color);
-    background-color: var(--danger-bg);
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-weight: bold;
-    border: 1px solid #f87171;
-    margin: 15px 0;
-    text-align: center;
-}
-
-/* --- Sección de Votación y Botones Inferiores --- */
-.votar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-end;
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 2px solid var(--bg-card);
-}
-
-.votar label {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.9rem;
-    flex: 1;
-    min-width: 100px;
-}
-
-.votar select {
-    margin: 8px 0 0 0;
-    padding: 10px;
-}
-
-.votar button {
-    flex: 1 1 auto;
-    min-width: 140px;
-    margin-top: 10px;
-    padding: 12px 15px;
-    font-size: 0.9rem;
-}
-
-/* Botón de "Desertar" o acciones destructivas dentro de la tarjeta */
-.votar button:nth-child(5), 
-.votar button:nth-child(6) {
-    background-color: white;
-    color: var(--danger-color);
-    border: 2px solid var(--danger-color);
-}
-
-.votar button:nth-child(5):hover, 
-.votar button:nth-child(6):hover {
-    background-color: var(--danger-bg);
-}
-
-/* --- Rankings y top de situaciones --- */
-.ranking-descripcion {
-    color: var(--text-sub);
-    margin-top: 0;
-}
-
-.ranking-lista {
-    padding-left: 24px;
-    margin: 10px 0 0 0;
-}
-
-.ranking-lista li {
-    margin: 8px 0;
-}
-
-.ranking-lista li strong {
-    float: right;
-    color: var(--text-heading);
+button.btn-estado {
+  background: linear-gradient(135deg, #4c1d95, var(--lavanda));
+  color: #0b1030;
+  box-shadow: 0 4px 12px rgba(76, 29, 149, 0.3);
 }
 
 button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Enlaces (fuera de la cabecera)  */
+main a {
+  color: var(--azul);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+main a:hover {
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+/* Secciones internas (Perfil, Rankings, Foro)  */
+section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #d9e0ff;
+  margin-bottom: 22px;
+  box-shadow: 0 2px 8px rgba(11, 16, 48, 0.05);
+}
+
+section p {
+  margin: 10px 0;
+  font-size: 1.05rem;
+}
+
+/* Tarjeta de coartada  */
+.tarjeta-coartada {
+  background-color: #fff;
+  border: 1px solid #d9e0ff;
+  border-left: 5px solid var(--azul);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 22px;
+  max-width: 100%;
+  box-shadow: 0 4px 14px rgba(11, 16, 48, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta-coartada:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(11, 16, 48, 0.16);
+}
+
+.tarjeta-coartada h3 {
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--bg-suave);
+  padding-bottom: 12px;
+}
+
+.tarjeta-coartada p {
+  margin: 8px 0;
+  line-height: 1.55;
+}
+
+.tarjeta-coartada strong {
+  color: var(--text-sub);
+}
+
+.tarjeta-coartada .indice {
+  color: #fff;
+  background: linear-gradient(135deg, var(--negro), var(--navy) 60%, var(--azul-oscuro));
+  padding: 8px 16px;
+  border-radius: 999px;
+  display: inline-block;
+  margin: 14px 0;
+  font-size: 1.05rem;
+}
+
+.tarjeta-coartada .indice strong {
+  color: #fff;
+}
+
+/* Etiqueta de estado */
+.estado {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.estado-Draft { background: #e5e7eb; color: #374151; }
+.estado-Submitted { background: #dbe5ff; color: #1b2a9c; }
+.estado-UnderReview { background: #fef3c7; color: #92400e; }
+.estado-Approved { background: #d1fae5; color: #065f46; }
+.estado-Rejected { background: #fee2e2; color: #991b1b; }
+
+/*  Alertas y bloqueos  */
+.bloqueado,
+.aviso-expuesta {
+  color: var(--danger-color);
+  background-color: var(--danger-bg);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  border: 1px solid #f87171;
+  margin: 15px 0;
+  text-align: center;
+}
+
+/*  Votación y botones de la tarjeta  */
+.votar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 2px solid var(--bg-suave);
+}
+
+.votar label {
+  flex: 1 1 140px;
+  margin: 0;
+}
+
+.votar select {
+  margin: 6px 0 0 0;
+}
+
+.votar button {
+  flex: 1 1 calc(50% - 12px);
+  width: auto;
+  margin-top: 0;
+}
+
+/* Rankings y top de situaciones  */
+.ranking-descripcion {
+  color: var(--text-sub);
+  margin-top: 0;
+}
+
+.ranking-lista {
+  list-style: none;
+  counter-reset: puesto;
+  padding: 0;
+  margin: 12px 0 0 0;
+}
+
+.ranking-lista li {
+  counter-increment: puesto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 10px 14px;
+  background: var(--bg-suave);
+  border-radius: 10px;
+}
+
+.ranking-lista li::before {
+  content: counter(puesto);
+  flex: 0 0 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ranking-lista li:nth-child(1)::before { background: linear-gradient(135deg, #fde68a, #f59e0b); color: var(--navy); }
+.ranking-lista li:nth-child(2)::before { background: linear-gradient(135deg, #f3f4f6, #9ca3af); color: var(--navy); }
+.ranking-lista li:nth-child(3)::before { background: linear-gradient(135deg, #fdba74, #b45309); color: #fff; }
+
+.ranking-lista li span {
+  flex: 1;
+}
+
+.ranking-lista li strong {
+  color: var(--azul-oscuro);
+  white-space: nowrap;
+}
+
+/*  Móvil */
+@media (max-width: 640px) {
+  header {
+    padding: 12px 16px;
+  }
+
+  main:not(.min-h-screen) {
+    padding: 24px 18px;
+    margin: 24px 12px;
+  }
 }

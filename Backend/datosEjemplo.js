@@ -3,6 +3,7 @@
 // Uso:  npm run datos:ejemplo
 require("dotenv").config();
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const Gremio = require("./models/Gremio");
 const Usuario = require("./models/Usuario");
@@ -122,32 +123,44 @@ async function ejecutar() {
     await admin.save();
   }*/ //Cambio temporal para poner la contraseña de todos los usuarios igual y que no se borre nada
   // Usuarios (+ admin) - FORZANDO ACTUALIZACIÓN DE CONTRASEÑA
+  // Encriptamos la contraseña una sola vez con bcrypt
+  const passwordHash = await bcrypt.hash(PASSWORD, 10);
+
+  // Usuarios (+ admin)
   const usuarios = [];
   for (const u of usuariosData) {
     let doc = await Usuario.findOne({ alias: u.alias });
     if (!doc) {
-      doc = new Usuario({
+      doc = await Usuario.create({
         alias: u.alias,
-        password: PASSWORD,
+        password: passwordHash,
         especialidad: u.especialidad,
         gremio: gremios[u.g]._id,
       });
     } else {
-      doc.password = PASSWORD; // Fuerza la contraseña HelloWorld*29
-      doc.gremio = gremios[u.g]._id;
+      // Actualizamos directo en la BD por si estaba en texto plano o dañada
+      await Usuario.updateOne(
+        { _id: doc._id },
+        { $set: { password: passwordHash, gremio: gremios[u.g]._id } }
+      );
     }
-    await doc.save();
     usuarios.push(doc);
   }
 
   let admin = await Usuario.findOne({ alias: "Director" });
   if (!admin) {
-    admin = new Usuario({ alias: "Director", password: PASSWORD, especialidad: "Conspirador", role: "admin" });
+    admin = await Usuario.create({
+      alias: "Director",
+      password: passwordHash,
+      especialidad: "Conspirador",
+      role: "admin",
+    });
   } else {
-    admin.password = PASSWORD; // Fuerza la contraseña HelloWorld*29
-    admin.role = "admin";
+    await Usuario.updateOne(
+      { _id: admin._id },
+      { $set: { password: passwordHash, role: "admin" } }
+    );
   }
-  await admin.save();
   //Borrar despues hasta aqui!!
 
   // Situaciones del foro

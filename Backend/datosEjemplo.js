@@ -102,12 +102,12 @@ async function ejecutar() {
   }
 
   // Usuarios (+ admin)
-  const usuarios = [];
+  /*const usuarios = [];
   for (const u of usuariosData) {
     let doc = await Usuario.findOne({ alias: u.alias });
     if (!doc) {
       doc = new Usuario({
-        alias: u.alias,
+        alias: u.alias,   
         password: PASSWORD,
         especialidad: u.especialidad,
         gremio: gremios[u.g]._id,
@@ -120,7 +120,35 @@ async function ejecutar() {
   if (!admin) {
     admin = new Usuario({ alias: "Director", password: PASSWORD, especialidad: "Conspirador", role: "admin" });
     await admin.save();
+  }*/ //Cambio temporal para poner la contraseña de todos los usuarios igual y que no se borre nada
+  // Usuarios (+ admin) - FORZANDO ACTUALIZACIÓN DE CONTRASEÑA
+  const usuarios = [];
+  for (const u of usuariosData) {
+    let doc = await Usuario.findOne({ alias: u.alias });
+    if (!doc) {
+      doc = new Usuario({
+        alias: u.alias,
+        password: PASSWORD,
+        especialidad: u.especialidad,
+        gremio: gremios[u.g]._id,
+      });
+    } else {
+      doc.password = PASSWORD; // Fuerza la contraseña HelloWorld*29
+      doc.gremio = gremios[u.g]._id;
+    }
+    await doc.save();
+    usuarios.push(doc);
   }
+
+  let admin = await Usuario.findOne({ alias: "Director" });
+  if (!admin) {
+    admin = new Usuario({ alias: "Director", password: PASSWORD, especialidad: "Conspirador", role: "admin" });
+  } else {
+    admin.password = PASSWORD; // Fuerza la contraseña HelloWorld*29
+    admin.role = "admin";
+  }
+  await admin.save();
+  //Borrar despues hasta aqui!!
 
   // Situaciones del foro
   let situacionesNuevas = 0;
@@ -182,12 +210,16 @@ async function ejecutar() {
     await coartada.save(); // recalcula el índice de credibilidad
     nuevas++;
 
-    // Penalización por exposición: -10 y bloqueo de 7 días
+  // Penalización por exposición: -10 y bloqueo de 7 días
     if (c.expuesta) {
       const autor = usuarios[autorIdx];
-      autor.credibilidad = autor.credibilidad - 10;
-      autor.bloqueadoHasta = new Date(Date.now() + SIETE_DIAS);
-      await autor.save();
+      await Usuario.updateOne(
+        { _id: autor._id },
+        { 
+          $inc: { credibilidad: -10 },
+          $set: { bloqueadoHasta: new Date(Date.now() + SIETE_DIAS) }
+        }
+      );
     }
   }
 

@@ -124,43 +124,44 @@ async function ejecutar() {
   }*/ //Cambio temporal para poner la contraseña de todos los usuarios igual y que no se borre nada
   // Usuarios (+ admin) - FORZANDO ACTUALIZACIÓN DE CONTRASEÑA
   // Encriptamos la contraseña una sola vez con bcrypt
+  const bcrypt = require("bcryptjs");
   const passwordHash = await bcrypt.hash(PASSWORD, 10);
 
-  // Usuarios (+ admin)
+  // Usuarios (+ admin) directos en MongoDB sin pasar por hooks de Mongoose
   const usuarios = [];
   for (const u of usuariosData) {
     let doc = await Usuario.findOne({ alias: u.alias });
     if (!doc) {
-      doc = await Usuario.create({
+      doc = new Usuario({
         alias: u.alias,
-        password: passwordHash,
+        password: PASSWORD,
         especialidad: u.especialidad,
         gremio: gremios[u.g]._id,
       });
-    } else {
-      // Actualizamos directo en la BD por si estaba en texto plano o dañada
-      await Usuario.updateOne(
-        { _id: doc._id },
-        { $set: { password: passwordHash, gremio: gremios[u.g]._id } }
-      );
+      await doc.save();
     }
+    // Forzamos el hash limpio directamente en la colección de MongoDB
+    await Usuario.collection.updateOne(
+      { _id: doc._id },
+      { $set: { password: passwordHash, gremio: gremios[u.g]._id } }
+    );
     usuarios.push(doc);
   }
 
   let admin = await Usuario.findOne({ alias: "Director" });
   if (!admin) {
-    admin = await Usuario.create({
+    admin = new Usuario({
       alias: "Director",
-      password: passwordHash,
+      password: PASSWORD,
       especialidad: "Conspirador",
       role: "admin",
     });
-  } else {
-    await Usuario.updateOne(
-      { _id: admin._id },
-      { $set: { password: passwordHash, role: "admin" } }
-    );
+    await admin.save();
   }
+  await Usuario.collection.updateOne(
+    { _id: admin._id },
+    { $set: { password: passwordHash, role: "admin" } }
+  );
   //Borrar despues hasta aqui!!
 
   // Situaciones del foro

@@ -84,6 +84,5 @@ function TarjetaCoartada({ coartada, onVotar, onTestigo, onDesertar, onMarcarFal
 export default TarjetaCoartada;
 
 export function modificarCredibilidad(alias, puntos) {
-    // Lógica para actualizar la credibilidad del usuario
-    console.log(`Credibilidad de ${alias} modificada en ${puntos} puntos.`);
+    // Sincronizado mediante la API del Backend
 }

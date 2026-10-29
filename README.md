@@ -103,4 +103,118 @@ AlibiForge2/
 │   ├── vite.config.js              # Configuración de Vite
 │   └── package.json
 │
-└── README.md                       # Documentación técnica del proyecto
+├── README.md                       # Documentación técnica del proyecto
+│
+└── netlify.toml                    # Conexión con Netlify
+```
+
+---
+
+## 🚀 Guía de Instalación y Ejecución en Entorno Local
+
+Sigue estos pasos para clonar y ejecutar el ecosistema completo (Backend + Frontend) en tu máquina local:
+
+### Prerrequisitos
+- **Node.js** (v18 o superior) y **npm**
+- Instancia de **MongoDB** (Local o clúster en **MongoDB Atlas**)
+- **Git**
+
+### 1. Clonar el repositorio
+```bash
+git clone <URL_DE_TU_REPOSITORIO_GITHUB>
+cd AlibiForge2
+```
+
+### 2. Configurar y encender el Backend
+1. Abre una terminal y entra a la carpeta del servidor:
+   ```bash
+   cd Backend
+   npm install
+   ```
+2. Crea un archivo `.env` dentro de la carpeta `Backend/` (puedes guiarte de `.env.example`) con las siguientes variables:
+   ```env
+   PORT=3000
+   MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/alibiforge?retryWrites=true&w=majority
+   JWT_SECRET=tu_clave_secreta_super_segura_jwt
+   ```
+3. *(Opcional)* Poblar la base de datos con los datos iniciales de prueba (Gremios, Usuarios, Situaciones y Coartadas):
+   ```bash
+   npm run datos:ejemplo
+   # o: node datosEjemplo.js
+   ```
+4. Inicia el servidor en modo desarrollo:
+   ```bash
+   npm run dev
+   ```
+   - El servidor estará disponible en `http://localhost:3000`
+   - La documentación Swagger estará en `http://localhost:3000/api-docs`
+
+### 3. Configurar y encender el Frontend
+1. Abre una **segunda terminal** y entra a la carpeta del cliente:
+   ```bash
+   cd Frontend
+   npm install
+   ```
+2. Crea un archivo `.env` en la raíz de `Frontend/` apuntando a tu servidor backend (local o de producción):
+   ```env
+   VITE_API_URL=http://localhost:3000
+   ```
+   *(Nota: Si deseas conectarlo directamente al backend en producción usa `VITE_API_URL=https://alibiforge.onrender.com`).*
+3. Inicia la aplicación de React con Vite:
+   ```bash
+   npm run dev
+   ```
+4. Abre en tu navegador la URL indicada en consola (usualmente `http://localhost:5173`).
+
+---
+
+## 📡 Mapeo de Endpoints Principales (API REST)
+
+Todos los endpoints protegidos requieren el envío del token JWT en la cabecera HTTP:
+`Authorization: Bearer <token>`
+
+### 🔐 Autenticación y Usuarios (`/api/auth`)
+| Método | Endpoint | Acceso | Descripción |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Público | Registra un nuevo agente con alias, contraseña, especialidad y gremio. |
+| `POST` | `/api/auth/login` | Público | Autentica al usuario y retorna el token JWT junto con los datos del perfil. |
+| `GET` | `/api/auth/profile` | Privado (JWT) | Obtiene la información actualizada, credibilidad y estado del usuario autenticado. |
+
+### 🕵️ Coartadas y Alibi Chain (`/api/coartadas`)
+| Método | Endpoint | Acceso | Descripción |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/coartadas` | Público / Privado | Lista coartadas con filtros opcionales (situación, estado, orden por credibilidad). |
+| `GET` | `/api/coartadas/:id` | Público / Privado | Obtiene el detalle completo de una coartada, sus testigos y calificaciones. |
+| `POST` | `/api/coartadas` | Privado (JWT) | Crea una nueva coartada (verifica que el usuario no esté bloqueado). |
+| `PUT` | `/api/coartadas/:id` | Autor / Admin | Actualiza título, historia, detalles ancla o estado de la coartada. |
+| `DELETE` | `/api/coartadas/:id` | Autor / Admin | Elimina una coartada del sistema. |
+| `PATCH` | `/api/coartadas/:id/estado` | Admin / Autor | Transiciona el estado (`Draft` ➔ `Submitted` ➔ `Approved` / `Rejected`). |
+| `POST` | `/api/coartadas/:id/testigos` | Privado (JWT) | Une al usuario actual a la cadena de testigos (*Alibi Chain*). |
+| `DELETE` | `/api/coartadas/:id/testigos` | Privado (JWT) | El testigo deserta de la coartada (aplica penalización por traición). |
+| `POST` | `/api/coartadas/:id/votar` | Privado (JWT) | Registra el voto en Credibilidad, Creatividad y Consistencia (1 a 5). |
+| `POST` | `/api/coartadas/:id/marcar-falsa`| Privado (JWT) | Añade una marca de falsedad; a la 3.ª marca expone la coartada y bloquea al autor. |
+
+### 📌 Situaciones del Foro (`/api/situaciones`)
+| Método | Endpoint | Acceso | Descripción |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/situaciones` | Público | Obtiene todas las situaciones de riesgo disponibles en el foro. |
+| `POST` | `/api/situaciones` | Privado / Admin | Crea una nueva situación en el foro. |
+| `DELETE` | `/api/situaciones/:id` | Admin | Elimina una situación del catálogo. |
+
+### 🏆 Rankings y Gremios (`/api/rankings`)
+| Método | Endpoint | Acceso | Descripción |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/rankings` | Público | Obtiene los tableros de líderes (*Master of Deceit*, *Most Creative*, *Most Consistent*, *Most Wanted* y Gremios). |
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Backend:** Node.js, Express.js, MongoDB Atlas, Mongoose, JSON Web Tokens (`jsonwebtoken`), `bcryptjs`, `express-validator`, `cors`, `dotenv`, `swagger-jsdoc` y `swagger-ui-express`.
+- **Frontend:** React, Vite, Fetch / Axios (con interceptores HTTP), React Router DOM, Context API, CSS moderno responsivo.
+- **Despliegue y DevOps:** Render (Web Service Backend), Netlify (Hosting SPA Frontend), MongoDB Atlas (Cloud Database), Git & GitHub.
+
+---
+
+## 📄 Licencia
+Este proyecto está bajo la Licencia **MIT**. Desarrollado para la asignatura de **Ingeniería Web (Semestre 2026-2)**.

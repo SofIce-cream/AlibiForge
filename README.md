@@ -94,7 +94,7 @@ AlibiForge2/
 
 ### 1. Clonar el repositorio
 ```bash
-git clone <URL_DEL_REPOSITORIO_GITHUB>
+git clone https://github.com/SofIce-cream/AlibiForge
 cd AlibiForge2
 ```
 

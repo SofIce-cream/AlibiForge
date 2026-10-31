@@ -411,3 +411,86 @@ section p {
     margin: 24px 12px;
   }
 }
+
+/* Mensajes, carga y paneles de administración */
+.mensaje {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin: 14px 0;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.mensaje-error { color: var(--danger-color); background: var(--danger-bg); border-color: #f87171; }
+.mensaje-ok { color: #065f46; background: #d1fae5; border-color: #6ee7b7; }
+.mensaje-info { color: var(--text-sub); background: var(--bg-suave); border-color: var(--border-color); }
+
+.cargando {
+  text-align: center;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+header nav .nav-salir {
+  background: transparent;
+  border: 1px solid rgba(172, 151, 255, 0.45);
+  color: #c9cdf5;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+header nav .nav-salir:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.fila-admin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 14px;
+  margin: 8px 0;
+  background: var(--bg-suave);
+  border-radius: 10px;
+}
+
+.fila-admin .datos { flex: 1 1 240px; }
+.fila-admin .acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.fila-admin button {
+  width: auto;
+  margin-top: 0;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+}
+
+section > button { margin-right: 8px; width: auto; }
+
+.versiones {
+  margin: 10px 0;
+  padding: 10px 14px;
+  background: var(--bg-suave);
+  border-radius: 10px;
+}
+
+.versiones summary { cursor: pointer; font-weight: 700; color: var(--text-sub); }
+.versiones .version { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+
+header nav a:focus-visible,
+header nav .nav-salir:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--azul-claro);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  header nav { width: 100%; }
+  .votar button { flex: 1 1 100%; }
+  .fila-admin .acciones { width: 100%; }
+}

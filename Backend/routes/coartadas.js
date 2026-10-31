@@ -137,7 +137,7 @@ router.post("/", validarCoartada, coartadaController.crearCoartada);
  *       404:
  *         description: Coartada no encontrada
  */
-router.put("/:id", coartadaController.actualizarCoartada);
+router.put("/:id", validarCoartada, coartadaController.actualizarCoartada);
 
 /**
  * @swagger
@@ -248,7 +248,7 @@ router.delete("/:id/testigo", coartadaController.desertarDeLaCadena);
  *                 maximum: 5
  *     responses:
  *       200:
- *         description: Voto registrado (si ya habías votado, se actualiza)
+ *         description: Voto registrado.
  *       400:
  *         description: Datos de voto inválidos
  *       404:

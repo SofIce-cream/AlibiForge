@@ -15,6 +15,18 @@ const votoSchema = new mongoose.Schema(
   { _id: false, timestamps: true },
 );
 
+// Copia de una versión anterior de la coartada
+const versionSchema = new mongoose.Schema(
+  {
+    numero: { type: Number, required: true },
+    titulo: { type: String, trim: true },
+    situacion: { type: String, trim: true },
+    historia: { type: String, trim: true },
+    detalles: { type: [String], default: [] },
+  },
+  { _id: false, timestamps: { createdAt: true, updatedAt: false } },
+);
+
 const coartadaSchema = new mongoose.Schema(
   {
     titulo: {
@@ -70,6 +82,9 @@ const coartadaSchema = new mongoose.Schema(
         message: "Un usuario solo puede votar una vez por coartada",
       },
     },
+        // Historial de versiones anteriores 
+    versiones: { type: [versionSchema], default: [] },
+    
     marcasFalsas: [{ type: mongoose.Schema.Types.ObjectId, ref: "Usuario" }],
     expuesta: { type: Boolean, default: false },
     // Se recalcula en cada guardado (voto, testigo, detalles...)

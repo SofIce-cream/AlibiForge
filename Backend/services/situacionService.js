@@ -82,4 +82,37 @@ async function solicitarCoartada(id, mensaje, usuarioActual) {
   return await obtenerSituacion(id, usuarioActual);
 }
 
-module.exports = { listarSituaciones, obtenerSituacion, crearSituacion, solicitarCoartada };
+// Solo admin (ver routes). Si cambia el título, se actualizan también las coartadas ligadas a ella
+async function actualizarSituacion(id, { titulo, descripcion }) {
+  const situacion = await Situacion.findById(id);
+  if (!situacion) throw { status: 404, message: "Situación no encontrada" };
+
+  const tituloViejo = situacion.titulo;
+  if (titulo !== undefined) {
+    const nuevo = titulo.trim();
+    if (nuevo.toLowerCase() !== tituloViejo.toLowerCase()) {
+      const existente = await Situacion.findOne({ titulo: new RegExp(`^${escapar(nuevo)}$`, "i") });
+      if (existente) throw { status: 400, message: "Ya existe una situación con este título" };
+    }
+    situacion.titulo = nuevo;
+  }
+  if (descripcion !== undefined) situacion.descripcion = descripcion;
+
+  await situacion.save();
+
+  if (situacion.titulo !== tituloViejo) {
+    await Coartada.updateMany(
+      { situacion: new RegExp(`^${escapar(tituloViejo)}$`, "i") },
+      { $set: { situacion: situacion.titulo } },
+    );
+  }
+  return situacion;
+}
+
+async function eliminarSituacion(id) {
+  const situacion = await Situacion.findById(id);
+  if (!situacion) throw { status: 404, message: "Situación no encontrada" };
+  await situacion.deleteOne();
+}
+
+module.exports = {listarSituaciones, obtenerSituacion, crearSituacion, solicitarCoartada, actualizarSituacion, eliminarSituacion};

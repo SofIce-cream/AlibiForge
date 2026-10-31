@@ -23,7 +23,8 @@ function poblar(query) {
 }
 
 function idDe(valor) {
-  return (valor && valor._id ? valor._id : valor).toString();
+  if (valor === null || valor === undefined) return "";
+  return (valor._id ? valor._id : valor).toString();  
 }
 
 // Agrega índice recalculado, promedio y las transiciones que puede hacer el usuario
@@ -128,7 +129,7 @@ async function crearCoartada(data, usuarioActual) {
 async function actualizarCoartada(id, data, usuarioActual) {
   const coartada = await cargarCoartada(id);
   const esAdmin = usuarioActual.role === "admin";
-  const esAutor = coartada.autor.toString() === usuarioActual._id.toString();
+  const esAutor = idDe(coartada.autor) === usuarioActual._id.toString();
 
   if (!esAutor && !esAdmin) {
     throw { status: 403, message: "No tienes permisos para actualizar esta coartada" };
@@ -143,6 +144,17 @@ async function actualizarCoartada(id, data, usuarioActual) {
 
   if (editaContenido && coartada.estado !== "Draft") {
     throw { status: 400, message: "Solo se puede editar el contenido de un borrador" };
+  }
+
+  // Antes de cambiar el contenido, guardamos la versión actual en el historial
+  if (editaContenido) {
+    coartada.versiones.push({
+      numero: coartada.versiones.length + 1,
+      titulo: coartada.titulo,
+      situacion: coartada.situacion,
+      historia: coartada.historia,
+      detalles: [...coartada.detalles],
+    });
   }
 
   if (titulo !== undefined) coartada.titulo = titulo;

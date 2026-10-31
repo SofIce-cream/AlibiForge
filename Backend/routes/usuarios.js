@@ -103,7 +103,7 @@ router.put(
   body("role").isIn(["admin", "user"]).withMessage("El rol debe ser 'admin' o 'user'"),
   verificarValidaciones,
   asyncHandler(async (req, res) => {
-    const usuario = await usuarioService.cambiarRol(req.params.id, req.body.role);
+    const usuario = await usuarioService.cambiarRol(req.params.id, req.body.role, req.usuario.id);
     res.json({ mensaje: "Rol actualizado correctamente", usuario });
   })
 );
@@ -131,7 +131,7 @@ router.put(
 router.delete(
   "/:id",
   asyncHandler(async (req, res) => {
-    await usuarioService.eliminarUsuario(req.params.id);
+    await usuarioService.eliminarUsuario(req.params.id, req.usuario.id);
     res.status(200).json({ mensaje: "Usuario eliminado exitosamente" });
   })
 );

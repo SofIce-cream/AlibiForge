@@ -14,7 +14,11 @@ const gremiosRouter = require("./routes/gremios");
 
 const app = express();
 
-app.use(cors());
+// CORS_ORIGIN: URL(s) del frontend separadas por coma. 
+const origenesPermitidos = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim().replace(/\/$/, ""))
+  : true;
+app.use(cors({ origin: origenesPermitidos }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // para parsear el body de las peticiones
 app.use("/api/situaciones", situacionesRouter);
@@ -34,8 +38,8 @@ const swaggerOption = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3000}`,
-        description: "Local Host",
+        url: process.env.PUBLIC_API_URL || `http://localhost:${process.env.PORT || 3000}`,
+        description: process.env.PUBLIC_API_URL ? "Producción (Render)" : "Local Host",
       },
     ],
     components: {
@@ -65,6 +69,8 @@ app.get("/", (req, res) => {
       coartadas: "/api/coartadas",
       usuarios: "/api/usuarios",
       rankings: "/api/rankings",
+      situaciones: "/api/situaciones",
+      gremios: "/api/gremios",
     },
   });
 });

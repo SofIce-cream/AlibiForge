@@ -21,4 +21,14 @@ const solicitar = asyncHandler(async (req, res) => {
     res.status(200).json({ok: true, mensaje: "Solicitud registrada", situacion});
 });
 
-module.exports = {listar, obtener, crear, solicitar};
+const actualizar = asyncHandler(async (req, res) => {
+    const situacion = await situacionService.actualizarSituacion(req.params.id, req.body);
+    res.status(200).json({ok: true, mensaje: "Situación actualizada", situacion});
+});
+
+const eliminar = asyncHandler(async (req, res) => {
+    await situacionService.eliminarSituacion(req.params.id);
+    res.status(200).json({ok: true, mensaje: "Situación eliminada"});
+});
+
+module.exports = {listar, obtener, crear, solicitar, actualizar, eliminar};

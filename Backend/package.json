@@ -8,7 +8,6 @@
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "node seed.js",
-    "usuarios:prueba": "node crearUsuariosPrueba.js",
     "datos:ejemplo": "node datosEjemplo.js"
   },
   "keywords": [],

@@ -6,215 +6,211 @@
 ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB.svg)
 ![JWT](https://img.shields.io/badge/Auth-JWT-orange.svg)
 ![Netlify](https://img.shields.io/badge/Deploy-Netlify%20%2B%20Render-00C7B7.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**AlibiForge** es una plataforma web Full-Stack diseñada para que los estudiantes puedan fabricar, compartir, auditar y sostener coartadas de forma colaborativa para justificar ausencias en clase, entregas tardías o salidas improvisadas.
-
-El sistema calcula dinámicamente un **Índice de Credibilidad** basado en la complejidad de la historia (detalles ancla), la red de testigos que respaldan la versión (*Alibi Chain*), los gremios de pertenencia y las votaciones de la comunidad, premiando a los mejores en el ranking *Master of Deceit* y penalizando las coartadas expuestas como falsas.
+**AlibiForge** es una plataforma web Full-Stack donde los estudiantes crean, comparten, votan y sostienen coartadas de forma colaborativa. El sistema calcula un **Índice de Credibilidad** a partir de la complejidad de la historia (detalles ancla), la red de testigos (*Alibi Chain*) y las votaciones de la comunidad.
 
 ---
 
-## 🌐 Despliegue y Documentación en Producción
+## 🌐 Despliegue y documentación en producción
 
-| Entorno / Servicio | Plataforma | Enlace Público |
+| Servicio | Plataforma | Enlace público |
 | :--- | :--- | :--- |
-| 💻 **Aplicación Web (Frontend)** | Netlify | **[https://alibiforge.netlify.app/](https://alibiforge.netlify.app/)** |
-| ⚙️ **API Base (Backend)** | Render | **[https://alibiforge.onrender.com/](https://alibiforge.onrender.com/)** |
-| 📖 **Documentación Interactiva (Swagger UI)** | Render | **[https://alibiforge.onrender.com/api-docs/](https://alibiforge.onrender.com/api-docs/)** |
+| 💻 **Aplicación web (Frontend)** | Netlify | **https://alibiforge.netlify.app/** |
+| ⚙️ **API (Backend)** | Render | **https://alibiforge.onrender.com/** |
+| 📖 **Swagger UI** | Render | **https://alibiforge.onrender.com/api-docs/** |
 
-> **Nota sobre Render (Free Tier):** El servidor backend entra en modo de suspensión tras 15 minutos de inactividad. La primera petición puede tardar entre 45 y 60 segundos mientras el contenedor despierta.
-
----
-
-## 🔑 Credenciales de Prueba (Entorno de Producción y Seed)
-
-Para validar la autenticación End-to-End, el control de acceso basado en roles (**RBAC**) y las reglas de negocio, utiliza las siguientes cuentas preconfiguradas:
-
-| Rol en el Sistema | Alias (Usuario) | Contraseña | Especialidad | Propósito de Prueba |
-| :--- | :--- | :--- | :--- | :--- |
-| 🛡️ **Administrador** | `Director` | `HelloWorld*29` | Conspirador | Moderación, cambio de estados (`Approved` / `Rejected`), gestión de situaciones y permisos administrativos. |
-| 👤 **Usuario Estándar** | `ShadowHuntress` | `HelloWorld*29` | Excusa Creativa | Creación/edición de coartadas propias, votación, unirse/desertar de cadenas de testigos (*Alibi Chain*). |
-| 👤 **Usuario Estándar** | `TomatoSoup` | `HelloWorld*29` | Excusa Creativa | Pruebas cruzadas de votos, marcas de falsedad y cadenas colaborativas. |
-| 👤 **Usuario Estándar** | `PixelMonk` | `HelloWorld*29` | Detallista | Pruebas de coartadas en estado `Draft` y `Submitted`. |
-| 🚫 **Usuario Bloqueado** | `Cowfarm` | `HelloWorld*29` | Excusa Creativa | **Regla de negocio:** Cuenta sancionada (-10 pts y bloqueo de 7 días) tras tener una coartada expuesta por 3 marcas falsas. |
+> **Nota sobre Render:** el servidor se duerme tras 15 minutos sin uso. La primera petición puede tardar entre 45 y 60 segundos.
 
 ---
 
-## 🎯 Alcance y Características Principales
+## 🔑 Credenciales de prueba
 
-1. **Autenticación End-to-End y Perfiles Encubiertos:**
-   - Registro, inicio y cierre de sesión seguro mediante **JWT** (almacenado y gestionado en el cliente con interceptores HTTP) y contraseñas encriptadas con `bcryptjs`.
-   - Uso exclusivo de **alias** encubiertos, asignación de **Gremios** (*The Excuse Makers*, *The Detail Weavers*, *The Improvisers*) y especialidades (*Excusa Creativa*, *Detallista*, *Improvisador*, *Conspirador*).
-   - Protección de rutas privadas y visualización adaptativa según el rol (`user` vs. `admin`).
-2. **Fabricación de Coartadas (CRUD Completo) y Máquina de Estados:**
-   - Creación, lectura, actualización y eliminación de coartadas con título, situación objetivo, historia (máx. 500 caracteres) y mínimo **3 detalles ancla** (*anchor details*).
-   - Flujo de estados: `Draft` ➔ `Submitted` ➔ `UnderReview` ➔ `Approved` / `Rejected`.
-3. **Alibi Chain (Coartadas en Cadena):**
-   - Múltiples usuarios pueden unirse como **testigos** a una coartada existente para sostener la misma historia y elevar su índice de credibilidad.
-   - Sistema de **deserción**: si un testigo abandona la cadena, traiciona al grupo y penaliza la credibilidad tanto del autor como de los testigos restantes.
-4. **Foro de Situaciones de Riesgo:**
-   - Gestión y clasificación de coartadas según la ocasión (*"Llegué tarde a un parcial"*, *"No hice un proyecto"*, *"Necesito salir de clase"*), filtrables y ordenadas por su Índice de Credibilidad.
-5. **Sistema de Votación y Exposición (Caza de Mentiras):**
-   - Evaluación única por usuario en tres dimensiones (escala 1 a 5): **Credibilidad**, **Creatividad** y **Consistencia** (los autores no pueden votar en sus propias coartadas).
-   - **Exposición automática:** los usuarios pueden marcar una coartada como falsa; al acumular **3 marcas**, la coartada pasa a `Rejected` (`expuesta: true`), el autor pierde 10 puntos de credibilidad y queda bloqueado durante 7 días.
-6. **Rankings "Master of Deceit":**
-   - Tablas de clasificación dinámicas en tiempo real para *Master of Deceit*, *Most Creative*, *Most Consistent* y *Most Wanted*, además de estadísticas por gremio.
+Todas las cuentas usan la contraseña `HelloWorld*29`.
+
+| Rol | Alias | Qué probar |
+| :--- | :--- | :--- |
+| 🛡️ **Administrador** | `Director` | Panel de **Administración**, moderación de estados (`UnderReview` → `Approved`/`Rejected`), gestión de usuarios y de situaciones del foro. |
+| 👤 **Usuario estándar** | `ShadowHuntress` | Crear, editar, eliminar coartadas propias, votar, ser testigo / desertar. |
+| 👤 **Usuario estándar** | `TomatoSoup` | Pruebas cruzadas de votos, marcas de falsedad y cadenas. |
+| 🚫 **Usuario bloqueado** | `Cowfarm` | Regla de negocio: credibilidad < 0 ⇒ no puede crear coartadas durante 7 días. |
 
 ---
 
-## 📐 Arquitectura del Proyecto (Monorepo)
+## 🎯 Funcionalidades
 
-El repositorio está estructurado como un **Monorepo** con entornos y dependencias independientes para el servidor API RESTful (**Backend**) y la aplicación cliente SPA (**Frontend**):
+1. **Autenticación end-to-end:** registro, login y logout con JWT y contraseñas cifradas con `bcryptjs`. Un **interceptor de Axios** adjunta el token en cada petición y, si el servidor responde 401, cierra la sesión automáticamente. El estado de sesión se gestiona con **Context API** (`AuthContext`).
+2. **Roles y permisos (RBAC):** `user` y `admin`. El frontend oculta o muestra vistas según el rol (menú, ruta `/admin`, botones de moderación y edición del foro) y el backend vuelve a validar el rol en cada endpoint protegido.
+3. **Coartadas (CRUD completo):** crear (título, situación, historia ≤ 500 caracteres, mínimo 3 detalles ancla, testigos), listar con filtro, **editar borradores** y eliminar. Cada edición guarda la **versión anterior**, visible en la tarjeta ("Versiones anteriores").
+4. **Máquina de estados:** `Draft` → `Submitted` → `UnderReview` → `Approved` / `Rejected`.
+5. **Votación:** un voto por usuario y coartada (credibilidad, creatividad y consistencia, de 1 a 5). El autor no puede votar su propia coartada.
+6. **Índice de Credibilidad:** `(promedio × 10) + (testigos × 2) + complejidad` (3+ detalles = +5, 5+ = +10, 10+ = +20). Se recalcula con cada voto o cambio de testigos.
+7. **Alibi Chain:** unirse como testigo o desertar; al desertar se penaliza al autor y a los testigos restantes.
+8. **Exposición y sanciones:** 3 marcas de falsedad ⇒ la coartada pasa a `Rejected` y el autor pierde 10 puntos. Con credibilidad < 0 no puede crear coartadas durante 7 días.
+9. **Foro de situaciones:** crear situaciones, ver el top de coartadas por índice y solicitar una coartada. El administrador puede editar y eliminar situaciones.
+10. **Rankings:** *Master of Deceit*, *Most Creative*, *Most Consistent* y *Most Wanted*.
+11. **Panel de administración:** moderación de coartadas pendientes, cambio de rol y eliminación de usuarios.
+12. **Gestión de estados:** indicadores de carga, mensajes de error de la API en pantalla y validación de formularios.
+
+---
+
+## 📐 Arquitectura (monorepo)
 
 ```text
 AlibiForge2/
-├── Backend/                        # API RESTful (Node.js + Express + MongoDB Atlas)
-│   ├── config/
-│   │   └── db.js                   # Conexión a MongoDB Atlas mediante Mongoose
-│   ├── controllers/                # Controladores de peticiones y respuestas HTTP
-│   │   ├── authControllers.js      # Registro, login y perfil del agente autenticado
-│   │   ├── coartadaController.js   # CRUD de coartadas, votos, cadenas y marcas falsas
-│   │   ├── rankingController.js    # Rankings individuales y por gremios
-│   │   └── situacionController.js  # Gestión del catálogo de situaciones del foro
-│   ├── middleware/                 # Capa intermedia de seguridad y validación
-│   │   ├── auth.js                 # Verificación de token JWT y autorización por rol (RBAC)
-│   │   ├── errorHandler.js         # Manejo centralizado y estructurado de excepciones
-│   │   └── validators.js           # Reglas de validación con express-validator
-│   ├── models/                     # Esquemas de datos y lógica de dominio en Mongoose
-│   │   ├── Usuario.js              # alias, password, especialidad, gremio, credibilidad, role, bloqueadoHasta
-│   │   ├── Coartada.js             # titulo, situacion, historia, detalles, estado, testigos, votos, marcasFalsas
-│   │   ├── Gremio.js               # nombre, descripcion
-│   │   └── Situacion.js            # titulo, creador
-│   ├── routes/                     # Definición de rutas REST y documentación OpenAPI/Swagger
-│   ├── services/                   # Lógica de negocio desacoplada (Índice de Credibilidad, sanciones)
-│   ├── utils/                      # Utilidades auxiliares (asyncHandler, etc.)
-│   ├── crearUsuariosPrueba.js      # Script auxiliar para creación rápida de usuarios base
-│   ├── datosEjemplo.js             # Script Seeder completo (Gremios, 13 Usuarios, 10 Situaciones, 15 Coartadas)
-│   ├── app.js                      # Configuración de Express, CORS, middlewares y Swagger UI
-│   ├── index.js                    # Punto de entrada del servidor HTTP
-│   ├── .env.example                # Plantilla de variables de entorno del servidor
-│   └── package.json
+├── Backend/                        # API REST (Node.js + Express + MongoDB Atlas)
+│   ├── config/db.js                # Conexión a MongoDB con Mongoose
+│   ├── controllers/                # Peticiones y respuestas HTTP
+│   ├── middleware/                 # auth (JWT + roles), errorHandler, validators
+│   ├── models/                     # Usuario, Coartada, Gremio, Situacion
+│   ├── routes/                     # Rutas REST + documentación Swagger
+│   ├── services/                   # Lógica de negocio (índice, sanciones, estados)
+│   ├── utils/                      # Credibilidad, estados, asyncHandler
+│   ├── datosEjemplo.js             # Datos de prueba SIN borrar nada (usar en producción)
+│   ├── seed.js                     # ⚠ BORRA toda la base y la repuebla (solo desarrollo)
+│   ├── app.js / index.js           # Configuración de Express y arranque del servidor
+│   └── .env.example
 │
-├── Frontend/                       # Cliente Web SPA (React + Vite)
-│   ├── public/                     # Recursos estáticos
-│   ├── src/                        # Vistas, componentes modulares, Context API e interceptores HTTP
-│   ├── index.html                  # Plantilla raíz de la aplicación
-│   ├── netlify.toml                # Reglas de construcción y redirección SPA para Netlify
-│   ├── vite.config.js              # Configuración de Vite
-│   └── package.json
+├── Frontend/                       # SPA (React + Vite)
+│   ├── public/                     # Recursos estáticos (favicon)
+│   ├── src/
+│   │   ├── api/                    # Cliente Axios, interceptores y funciones por endpoint
+│   │   ├── context/                # AuthContext (sesión y rol)
+│   │   ├── components/             # TarjetaCoartada, Mensaje
+│   │   └── pages/                  # Login, Registro, Perfil, ListaCoartadas, CreateAlibi,
+│   │                               # AlibiChain, Situaciones, Rankings, Admin
+│   ├── index.html
+│   ├── vite.config.js
+│   └── .env.example
 │
-├── README.md                       # Documentación técnica del proyecto
-│
-└── netlify.toml                    # Conexión con Netlify
+├── netlify.toml                    # Build y redirección SPA para Netlify
+└── README.md
 ```
 
 ---
 
-## 🚀 Guía de Instalación y Ejecución en Entorno Local
+## 🚀 Instalación y ejecución en local
 
-Sigue estos pasos para clonar y ejecutar el ecosistema completo (Backend + Frontend) en tu máquina local:
-
-### Prerrequisitos
-- **Node.js** (v18 o superior) y **npm**
-- Instancia de **MongoDB** (Local o clúster en **MongoDB Atlas**)
-- **Git**
+**Prerrequisitos:** Node.js v18+, npm, Git y una base MongoDB (local o Atlas).
 
 ### 1. Clonar el repositorio
 ```bash
-git clone <URL_DE_TU_REPOSITORIO_GITHUB>
+git clone <URL_DEL_REPOSITORIO_GITHUB>
 cd AlibiForge2
 ```
 
-### 2. Configurar y encender el Backend
-1. Abre una terminal y entra a la carpeta del servidor:
-   ```bash
-   cd Backend
-   npm install
-   ```
-2. Crea un archivo `.env` dentro de la carpeta `Backend/` (puedes guiarte de `.env.example`) con las siguientes variables:
-   ```env
-   PORT=3000
-   MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/alibiforge?retryWrites=true&w=majority
-   JWT_SECRET=tu_clave_secreta_super_segura_jwt
-   ```
-3. *(Opcional)* Poblar la base de datos con los datos iniciales de prueba (Gremios, Usuarios, Situaciones y Coartadas):
-   ```bash
-   npm run datos:ejemplo
-   # o: node datosEjemplo.js
-   ```
-4. Inicia el servidor en modo desarrollo:
-   ```bash
-   npm run dev
-   ```
-   - El servidor estará disponible en `http://localhost:3000`
-   - La documentación Swagger estará en `http://localhost:3000/api-docs`
+### 2. Backend
+```bash
+cd Backend
+npm install
+```
+Crea `Backend/.env` a partir de `.env.example`:
 
-### 3. Configurar y encender el Frontend
-1. Abre una **segunda terminal** y entra a la carpeta del cliente:
-   ```bash
-   cd Frontend
-   npm install
-   ```
-2. Crea un archivo `.env` en la raíz de `Frontend/` apuntando a tu servidor backend (local o de producción):
-   ```env
-   VITE_API_URL=http://localhost:3000
-   ```
-   *(Nota: Si deseas conectarlo directamente al backend en producción usa `VITE_API_URL=https://alibiforge.onrender.com`).*
-3. Inicia la aplicación de React con Vite:
-   ```bash
-   npm run dev
-   ```
-4. Abre en tu navegador la URL indicada en consola (usualmente `http://localhost:5173`).
+```env
+PORT=3000
+MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/alibiforge?retryWrites=true&w=majority
+JWT_SECRET=una_clave_larga_y_aleatoria
+JWT_EXPIRES_IN=24h
+NODE_ENV=development
+```
+
+Variables opcionales: `CORS_ORIGIN` (URL del frontend; si falta se acepta cualquier origen) y `PUBLIC_API_URL` (URL pública de la API, para que Swagger apunte a producción).
+
+Carga los datos de prueba (3 gremios, usuarios, 15 coartadas, 30 votos y 5 cadenas) y arranca el servidor:
+```bash
+npm run datos:ejemplo
+npm run dev
+```
+- API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/api-docs`
+
+> ⚠️ `npm run seed` **borra todas las colecciones** antes de repoblar. Úsalo solo en desarrollo; en producción usa `npm run datos:ejemplo`.
+
+### 3. Frontend
+En otra terminal:
+```bash
+cd Frontend
+npm install
+```
+Crea `Frontend/.env`:
+```env
+VITE_API_URL=http://localhost:3000
+```
+(Para usar el backend en producción: `VITE_API_URL=https://alibiforge.onrender.com`).
+
+```bash
+npm run dev
+```
+Abre `http://localhost:5173`.
 
 ---
 
-## 📡 Mapeo de Endpoints Principales (API REST)
+## ☁️ Despliegue
 
-Todos los endpoints protegidos requieren el envío del token JWT en la cabecera HTTP:
-`Authorization: Bearer <token>`
+- **Render (Backend):** Root Directory `Backend`, Build Command `npm install`, Start Command `npm start`. Variables: `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`.
+- **MongoDB Atlas:** en *Network Access* debe permitirse la IP de Render (por ejemplo `0.0.0.0/0`).
+- **Netlify (Frontend):** usa el `netlify.toml` de la raíz. Variable obligatoria: `VITE_API_URL=https://alibiforge.onrender.com` (sin `/` final). Sin ella la app apunta a `localhost`.
 
-### 🔐 Autenticación y Usuarios (`/api/auth`)
+---
+
+## 📡 Mapeo de endpoints (API REST)
+
+Todos los endpoints requieren la cabecera `Authorization: Bearer <token>`, salvo los marcados como **Público**.
+
+### 🔐 Autenticación (`/api/auth`)
 | Método | Endpoint | Acceso | Descripción |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Público | Registra un nuevo agente con alias, contraseña, especialidad y gremio. |
-| `POST` | `/api/auth/login` | Público | Autentica al usuario y retorna el token JWT junto con los datos del perfil. |
-| `GET` | `/api/auth/profile` | Privado (JWT) | Obtiene la información actualizada, credibilidad y estado del usuario autenticado. |
+| `POST` | `/api/auth/registrar` | Público | Registra un usuario (alias, contraseña, especialidad, gremio). |
+| `POST` | `/api/auth/login` | Público | Autentica y devuelve el usuario y el token JWT. |
+
+### 👤 Usuarios (`/api/usuarios`)
+| Método | Endpoint | Acceso | Descripción |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/usuarios/me` | JWT | Perfil del usuario autenticado. |
+| `GET` | `/api/usuarios/alias` | JWT | Alias disponibles (para elegir testigos). |
+| `GET` | `/api/usuarios` | Admin | Lista todos los usuarios. |
+| `PUT` | `/api/usuarios/:id/rol` | Admin | Cambia el rol (`admin` / `user`). |
+| `DELETE` | `/api/usuarios/:id` | Admin | Elimina al usuario y sus datos asociados. |
 
 ### 🕵️ Coartadas y Alibi Chain (`/api/coartadas`)
 | Método | Endpoint | Acceso | Descripción |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/coartadas` | Público / Privado | Lista coartadas con filtros opcionales (situación, estado, orden por credibilidad). |
-| `GET` | `/api/coartadas/:id` | Público / Privado | Obtiene el detalle completo de una coartada, sus testigos y calificaciones. |
-| `POST` | `/api/coartadas` | Privado (JWT) | Crea una nueva coartada (verifica que el usuario no esté bloqueado). |
-| `PUT` | `/api/coartadas/:id` | Autor / Admin | Actualiza título, historia, detalles ancla o estado de la coartada. |
-| `DELETE` | `/api/coartadas/:id` | Autor / Admin | Elimina una coartada del sistema. |
-| `PATCH` | `/api/coartadas/:id/estado` | Admin / Autor | Transiciona el estado (`Draft` ➔ `Submitted` ➔ `Approved` / `Rejected`). |
-| `POST` | `/api/coartadas/:id/testigos` | Privado (JWT) | Une al usuario actual a la cadena de testigos (*Alibi Chain*). |
-| `DELETE` | `/api/coartadas/:id/testigos` | Privado (JWT) | El testigo deserta de la coartada (aplica penalización por traición). |
-| `POST` | `/api/coartadas/:id/votar` | Privado (JWT) | Registra el voto en Credibilidad, Creatividad y Consistencia (1 a 5). |
-| `POST` | `/api/coartadas/:id/marcar-falsa`| Privado (JWT) | Añade una marca de falsedad; a la 3.ª marca expone la coartada y bloquea al autor. |
+| `GET` | `/api/coartadas` | JWT | Lista coartadas (los borradores solo los ven su autor y el admin). |
+| `GET` | `/api/coartadas/:id` | JWT | Detalle de una coartada. |
+| `POST` | `/api/coartadas` | JWT | Crea una coartada (valida el bloqueo de 7 días). |
+| `PUT` | `/api/coartadas/:id` | Autor / Admin | Edita un borrador y guarda la versión anterior. |
+| `DELETE` | `/api/coartadas/:id` | Autor / Admin | Elimina una coartada. |
+| `PUT` | `/api/coartadas/:id/estado` | Autor / Admin | Cambia de estado según la máquina de estados. |
+| `POST` | `/api/coartadas/:id/votar` | JWT | Vota credibilidad, creatividad y consistencia (1 a 5, una sola vez). |
+| `POST` | `/api/coartadas/:id/testigo` | JWT | Se une a la cadena como testigo. |
+| `DELETE` | `/api/coartadas/:id/testigo` | JWT | Deserta de la cadena (aplica penalización). |
+| `POST` | `/api/coartadas/:id/marcar-falsa` | JWT | Marca como falsa; a la 3.ª marca queda rechazada. |
+| `GET` | `/api/coartadas/:id/indice` | JWT | Desglose del Índice de Credibilidad. |
 
-### 📌 Situaciones del Foro (`/api/situaciones`)
+### 📌 Situaciones del foro (`/api/situaciones`)
 | Método | Endpoint | Acceso | Descripción |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/situaciones` | Público | Obtiene todas las situaciones de riesgo disponibles en el foro. |
-| `POST` | `/api/situaciones` | Privado / Admin | Crea una nueva situación en el foro. |
-| `DELETE` | `/api/situaciones/:id` | Admin | Elimina una situación del catálogo. |
+| `GET` | `/api/situaciones` | JWT | Lista las situaciones con totales. |
+| `GET` | `/api/situaciones/:id` | JWT | Detalle y top de coartadas por índice. |
+| `POST` | `/api/situaciones` | JWT | Crea una situación. |
+| `POST` | `/api/situaciones/:id/solicitar` | JWT | Solicita una coartada para esa situación. |
+| `PUT` | `/api/situaciones/:id` | Admin | Edita título y descripción. |
+| `DELETE` | `/api/situaciones/:id` | Admin | Elimina una situación. |
 
-### 🏆 Rankings y Gremios (`/api/rankings`)
+### 🏆 Rankings y gremios
 | Método | Endpoint | Acceso | Descripción |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/rankings` | Público | Obtiene los tableros de líderes (*Master of Deceit*, *Most Creative*, *Most Consistent*, *Most Wanted* y Gremios). |
+| `GET` | `/api/rankings` | JWT | Master of Deceit, Most Creative, Most Consistent y Most Wanted. |
+| `GET` | `/api/gremios` | Público | Lista de gremios (se usa en el registro). |
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías
 
-- **Backend:** Node.js, Express.js, MongoDB Atlas, Mongoose, JSON Web Tokens (`jsonwebtoken`), `bcryptjs`, `express-validator`, `cors`, `dotenv`, `swagger-jsdoc` y `swagger-ui-express`.
-- **Frontend:** React, Vite, Fetch / Axios (con interceptores HTTP), React Router DOM, Context API, CSS moderno responsivo.
-- **Despliegue y DevOps:** Render (Web Service Backend), Netlify (Hosting SPA Frontend), MongoDB Atlas (Cloud Database), Git & GitHub.
+- **Backend:** Node.js, Express 5, MongoDB Atlas, Mongoose, `jsonwebtoken`, `bcryptjs`, `express-validator`, `cors`, `dotenv`, `swagger-jsdoc` y `swagger-ui-express`.
+- **Frontend:** React, Vite, React Router, **Axios** (con interceptores HTTP), **Context API** y Tailwind CSS.
+- **Despliegue:** Render (Backend), Netlify (Frontend), MongoDB Atlas (base de datos), Git y GitHub.
 
 ---
 
 ## 📄 Licencia
-Este proyecto está bajo la Licencia **MIT**. Desarrollado para la asignatura de **Ingeniería Web (Semestre 2026-2)**.
+Proyecto bajo licencia **MIT**. Desarrollado para la asignatura de **Ingeniería Web (Semestre 2026-2)**.
